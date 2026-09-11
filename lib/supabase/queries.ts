@@ -14,9 +14,9 @@ export async function getDashboardData() {
 
   const supabase = createServerSupabaseClient();
   const [stockResult, movementResult, materialResult] = await Promise.all([
-    supabase.from("current_stock_view").select("*").limit(100),
-    supabase.from("stock_movements").select("*").order("movement_date", { ascending: false }).limit(50),
-    supabase.from("materials").select("*").eq("is_active", true).limit(100)
+    supabase.from("wms_current_stock_view").select("*").limit(100),
+    supabase.from("wms_stock_movements").select("*").order("movement_date", { ascending: false }).limit(50),
+    supabase.from("wms_materials").select("*").eq("is_active", true).limit(100)
   ]);
 
   if (stockResult.error || movementResult.error || materialResult.error) {

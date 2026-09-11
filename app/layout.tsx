@@ -44,6 +44,7 @@ const navGroups = [
     title: "Admin",
     items: [
       { href: "/admin/materials", label: "Item Master", icon: Boxes },
+      { href: "/admin/inventory", label: "Inventory Database", icon: Database },
       { href: "/admin/locations", label: "Location Master", icon: MapPinned },
       { href: "/admin/inbound", label: "Inbound Orders", icon: PackagePlus },
       { href: "/admin/labels", label: "Label Printing", icon: QrCode },

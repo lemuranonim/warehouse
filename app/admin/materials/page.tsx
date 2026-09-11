@@ -23,8 +23,12 @@ export default function MaterialsPage() {
         columns={[
           { key: "code", header: "SKU", render: (row) => row.materialCode },
           { key: "description", header: "Item Description", render: (row) => row.description },
+          { key: "hybrid", header: "Hybrid", render: (row) => row.hybrid },
           { key: "stage", header: "Stage", render: (row) => row.stage },
+          { key: "flagging", header: "Flagging", render: (row) => row.flagging || "-" },
+          { key: "type", header: "Type", render: (row) => row.type },
           { key: "product", header: "Product", render: (row) => row.product },
+          { key: "crop", header: "Crop", render: (row) => row.crop },
           { key: "package", header: "Pack Size", render: (row) => `${formatKg(row.standardPackageKg)} KG` },
           { key: "status", header: "Item Status", render: (row) => <StatusBadge value={row.status} /> }
         ]}

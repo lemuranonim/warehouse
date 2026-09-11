@@ -1,10 +1,11 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
-import { ClipboardList, Package, Truck } from "lucide-react";
+import { ClipboardList, FileDown, Truck } from "lucide-react";
 import { DataTable } from "@/components/data-table";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
-import { currentStock, outboundOrders } from "@/lib/demo-data";
+import { currentStock, deliveryNotes, outboundOrders } from "@/lib/demo-data";
 import { formatKg, formatStatusLabel } from "@/lib/format";
 
 export default function OutboundPage() {
@@ -57,6 +58,33 @@ export default function OutboundPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
+          <div>
+            <div className="section-title">Export Delivery Note</div>
+            <div className="section-subtitle">Buat laporan dari data pengiriman WMS menggunakan tata letak contoh PDF.</div>
+          </div>
+        </div>
+        <DataTable
+          columns={[
+            { key: "docNo", header: "DN No", render: (row) => <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--navy)" }}>{row.dnNo}</span> },
+            { key: "date", header: "Tanggal", render: (row) => row.dnDate },
+            { key: "outbound", header: "Outbound", render: (row) => row.outboundDocNo },
+            { key: "to", header: "Tujuan", render: (row) => row.destination },
+            { key: "vehicle", header: "Kendaraan", render: (row) => row.vehicle },
+            { key: "lines", header: "Lines", render: (row) => row.lines.length },
+            { key: "qty", header: "Total KG", render: (row) => <strong>{formatKg(row.totalQtyKg)}</strong> },
+            { key: "status", header: "Status", render: (row) => <StatusBadge value={row.status} /> },
+            { key: "action", header: "", render: (row) => (
+              <Link className="secondary-button compact-button" href={`/documents/delivery/${row.dnNo}`}>
+                <FileDown aria-hidden size={14} /> Lihat & Cetak
+              </Link>
+            ) },
+          ]}
+          rows={deliveryNotes}
+        />
       </section>
 
       {/* Tabs */}

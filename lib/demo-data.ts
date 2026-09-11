@@ -106,6 +106,7 @@ export type DeliveryNote = {
 
 export type DeliveryNoteLine = {
   lpnCode: string;
+  materialCode: string;
   materialDescription: string;
   lotNumber: string;
   qtyKg: number;
@@ -599,6 +600,7 @@ export const deliveryNotes: DeliveryNote[] = [
     lines: [
       {
         lpnCode: "LPN-20260521-000030",
+        materialCode: "151000155",
         materialDescription: "PS M AV4 AV5 & AV7 Clean Seed KG",
         lotNumber: "NPCYEB017A",
         qtyKg: 338,
@@ -619,6 +621,7 @@ export const deliveryNotes: DeliveryNote[] = [
     lines: [
       {
         lpnCode: "LPN-20260501-000001",
+        materialCode: "141000223",
         materialDescription: "Hybrid AV9 Raw Seed KG",
         lotNumber: "NPRHD2003",
         qtyKg: 79,
@@ -1062,7 +1065,7 @@ export const modules: ModuleItem[] = [
     module: "User & Role Access",
     route: "Sign In",
     features: "User login, role, and warehouse scope",
-    tables: "profiles, roles",
+    tables: "wms_profiles, wms_roles",
     backend: "Secure sign in",
     priority: "MVP",
     notes: "Email/password atau SSO."
@@ -1071,7 +1074,7 @@ export const modules: ModuleItem[] = [
     module: "Control Tower",
     route: "Operations Overview",
     features: "Inventory KPIs, open tasks, and transaction monitoring",
-    tables: "stock_movements, lpns",
+    tables: "wms_stock_movements, wms_lpns",
     backend: "Live stock summary",
     priority: "MVP",
     notes: "Realtime/refresh periodik."
@@ -1080,7 +1083,7 @@ export const modules: ModuleItem[] = [
     module: "Item Master",
     route: "SKU Setup",
     features: "SKU, description, crop, pack size, and item status",
-    tables: "materials",
+    tables: "wms_materials",
     backend: "Item setup",
     priority: "MVP",
     notes: "Import Excel."
@@ -1089,7 +1092,7 @@ export const modules: ModuleItem[] = [
     module: "Location Master",
     route: "Warehouse Locations",
     features: "Warehouse, room, aisle, rack, bin, staging, and dock",
-    tables: "locations",
+    tables: "wms_locations",
     backend: "Location setup",
     priority: "MVP",
     notes: "Generate scan code for each active location."
@@ -1098,7 +1101,7 @@ export const modules: ModuleItem[] = [
     module: "ASN / Inbound Orders",
     route: "Inbound Orders",
     features: "ASN entry, inbound upload, expected SKU and lot quantity",
-    tables: "inbound_documents, inbound_items",
+    tables: "wms_inbound_documents, wms_inbound_items",
     backend: "Plan review",
     priority: "MVP",
     notes: "Use item master and lot rules."
@@ -1107,7 +1110,7 @@ export const modules: ModuleItem[] = [
     module: "LPN Label Printing",
     route: "Labels",
     features: "Print and reprint LPN labels for received inventory",
-    tables: "lpns, scan_links",
+    tables: "wms_lpns, wms_scan_links",
     backend: "Label batch",
     priority: "MVP",
     notes: "LPN and QR are used for scan execution."
@@ -1116,7 +1119,7 @@ export const modules: ModuleItem[] = [
     module: "Scan Workstation",
     route: "Scan Result",
     features: "Open LPN, location, item, or document detail from scan",
-    tables: "scan_links",
+    tables: "wms_scan_links",
     backend: "Scan lookup",
     priority: "MVP",
     notes: "Access follows user role."
@@ -1125,7 +1128,7 @@ export const modules: ModuleItem[] = [
     module: "Putaway",
     route: "Putaway",
     features: "Confirm LPN to storage location",
-    tables: "stock_movements",
+    tables: "wms_stock_movements",
     backend: "Putaway posting",
     priority: "MVP",
     notes: "Checks LPN status and destination location."
@@ -1134,7 +1137,7 @@ export const modules: ModuleItem[] = [
     module: "Picking",
     route: "Picking",
     features: "Confirm pick task by location, LPN, and quantity",
-    tables: "stock_movements",
+    tables: "wms_stock_movements",
     backend: "Pick confirmation",
     priority: "MVP",
     notes: "Supports partial pick handling."
@@ -1143,7 +1146,7 @@ export const modules: ModuleItem[] = [
     module: "Dispatch",
     route: "Delivery Note",
     features: "Load validation, DN confirmation, and stock issue",
-    tables: "delivery_notes, stock_movements",
+    tables: "wms_delivery_notes, wms_stock_movements",
     backend: "Dispatch posting",
     priority: "MVP",
     notes: "Closes dispatch and updates inventory status."
@@ -1152,7 +1155,7 @@ export const modules: ModuleItem[] = [
     module: "Cycle Count",
     route: "Cycle Counts",
     features: "Count location, LPN, and actual quantity",
-    tables: "cycle_count_*",
+    tables: "wms_cycle_count_*",
     backend: "Count submission",
     priority: "P1",
     notes: "Variance review before adjustment."
@@ -1161,7 +1164,7 @@ export const modules: ModuleItem[] = [
     module: "Offline Scan Queue",
     route: "Offline Scans",
     features: "Hold scan submissions while network is unavailable",
-    tables: "sync_queue",
+    tables: "wms_sync_queue",
     backend: "Retry sync",
     priority: "P2",
     notes: "Useful for weak warehouse Wi-Fi."
@@ -1334,7 +1337,7 @@ export const rpcEndpoints: RpcEndpoint[] = [
     caller: "All roles",
     payload: "{ raw_value, workflow, device_info }",
     response: "entity_type, entity_id, display_payload",
-    tables: "scan_links, scan_events",
+    tables: "wms_scan_links, wms_scan_events",
     validation: "Validate scan code, entity, permission, and status",
     priority: "MVP"
   },
@@ -1344,7 +1347,7 @@ export const rpcEndpoints: RpcEndpoint[] = [
     caller: "Admin",
     payload: "{ inbound_item_id, package_size }",
     response: "lpns[], label_payload[]",
-    tables: "inbound_items, lpns, scan_links",
+    tables: "wms_inbound_items, wms_lpns, wms_scan_links",
     validation: "Split received quantity by standard pack size",
     priority: "MVP"
   },
@@ -1354,7 +1357,7 @@ export const rpcEndpoints: RpcEndpoint[] = [
     caller: "Operator",
     payload: "{ lpn_token, location_token, idempotency_key }",
     response: "movement_id",
-    tables: "lpns, locations, stock_movements",
+    tables: "wms_lpns, wms_locations, wms_stock_movements",
     validation: "LPN is ready, location is active, duplicate submit is blocked",
     priority: "MVP"
   },
@@ -1364,7 +1367,7 @@ export const rpcEndpoints: RpcEndpoint[] = [
     caller: "Admin/Supervisor",
     payload: "{ outbound_id, strategy/manual_lpn }",
     response: "picking_tasks[]",
-    tables: "outbound_items, lpns, picking_tasks",
+    tables: "wms_outbound_items, wms_lpns, wms_picking_tasks",
     validation: "Available stock is not already reserved",
     priority: "MVP"
   },
@@ -1374,7 +1377,7 @@ export const rpcEndpoints: RpcEndpoint[] = [
     caller: "Operator",
     payload: "{ task_id, location_token, lpn_token, qty, idempotency_key }",
     response: "pick_result",
-    tables: "picking_tasks, stock_movements",
+    tables: "wms_picking_tasks, wms_stock_movements",
     validation: "Task, location, LPN, and quantity match",
     priority: "MVP"
   },
@@ -1384,7 +1387,7 @@ export const rpcEndpoints: RpcEndpoint[] = [
     caller: "Checker/Operator",
     payload: "{ dn_token, lpn_tokens[], idempotency_key }",
     response: "stock_out_result",
-    tables: "stock_movements, lpns",
+    tables: "wms_stock_movements, wms_lpns",
     validation: "Delivery note is valid and all LPNs match",
     priority: "MVP"
   },
@@ -1394,7 +1397,7 @@ export const rpcEndpoints: RpcEndpoint[] = [
     caller: "Supervisor",
     payload: "{ count_line_id, approved_qty, reason }",
     response: "movement_id",
-    tables: "stock_movements",
+    tables: "wms_stock_movements",
     validation: "Variance has reason code and approval",
     priority: "P1"
   },
@@ -1404,7 +1407,7 @@ export const rpcEndpoints: RpcEndpoint[] = [
     caller: "Scanner app",
     payload: "{ events[] }",
     response: "sync_result[]",
-    tables: "scan_events, stock_movements",
+    tables: "wms_scan_events, wms_stock_movements",
     validation: "Retry is safe and conflicts are visible",
     priority: "P2"
   }

@@ -1,6 +1,7 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
-import { ClipboardCheck, ScanLine } from "lucide-react";
+import { ClipboardCheck, FileDown, ScanLine } from "lucide-react";
 import { DataTable } from "@/components/data-table";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
@@ -44,6 +45,32 @@ export default function ReceivingPage() {
         icon={ClipboardCheck}
         title="Verifikasi Penerimaan Barang"
       />
+
+      <section className="section">
+        <div className="section-header">
+          <div>
+            <div className="section-title">Preview Laporan Penerimaan</div>
+            <div className="section-subtitle">Isi laporan diambil dari ASN WMS; PDF acuan hanya menentukan format cetaknya.</div>
+          </div>
+        </div>
+        <DataTable
+          columns={[
+            { key: "doc", header: "Doc No", render: (row) => <span style={{ fontFamily: "monospace", fontWeight: 700 }}>{row.docNo}</span> },
+            { key: "date", header: "Tanggal", render: (row) => row.asnDate },
+            { key: "from", header: "Dari", render: (row) => row.supplier },
+            { key: "to", header: "Ke", render: () => "Advanta Seeds Warehouse" },
+            { key: "status", header: "Status", render: (row) => <StatusBadge value={row.status} /> },
+            { key: "lines", header: "Lot", render: (row) => row.lines.length },
+            { key: "qty", header: "Qty", render: (row) => <strong>{formatKg(row.totalQtyKg)} KG</strong> },
+            { key: "action", header: "", render: (row) => (
+              <Link className="secondary-button compact-button" href={`/documents/incoming/${row.docNo}`}>
+                <FileDown aria-hidden size={14} /> Preview
+              </Link>
+            ) },
+          ]}
+          rows={inboundDocuments}
+        />
+      </section>
 
       {/* Filter Tabs */}
       <section className="section">

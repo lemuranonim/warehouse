@@ -1,4 +1,5 @@
-import { PackagePlus, Printer, Upload } from "lucide-react";
+import Link from "next/link";
+import { FileDown, PackagePlus, Printer, Upload } from "lucide-react";
 import { DataTable } from "@/components/data-table";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
@@ -59,6 +60,33 @@ export default function InboundPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
+          <div>
+            <div className="section-title">Export Incoming Note</div>
+            <div className="section-subtitle">Buat laporan dari data ASN WMS menggunakan tata letak contoh PDF.</div>
+          </div>
+        </div>
+        <DataTable
+          columns={[
+            { key: "docNo", header: "Doc No", render: (row) => <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--navy)" }}>{row.docNo}</span> },
+            { key: "date", header: "Tanggal", render: (row) => row.asnDate },
+            { key: "from", header: "Dari", render: (row) => row.supplier },
+            { key: "to", header: "Ke", render: () => "Advanta Seeds Warehouse" },
+            { key: "prepared", header: "Disiapkan", render: (row) => row.createdBy },
+            { key: "lines", header: "Lines", render: (row) => row.lines.length },
+            { key: "qty", header: "Total KG", render: (row) => <strong>{formatKg(row.totalQtyKg)}</strong> },
+            { key: "status", header: "Status", render: (row) => <StatusBadge value={row.status} /> },
+            { key: "action", header: "", render: (row) => (
+              <Link className="secondary-button compact-button" href={`/documents/incoming/${row.docNo}`}>
+                <FileDown aria-hidden size={14} /> Lihat & Cetak
+              </Link>
+            ) },
+          ]}
+          rows={inboundDocuments}
+        />
       </section>
 
       {/* ASN Document list */}
