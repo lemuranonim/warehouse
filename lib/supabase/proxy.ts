@@ -1,12 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { hasAllowedRole, requiredRolesForPath } from "@/lib/access-control";
+import { hasAllowedRole, requiredRolesForPath } from "../access-control";
 import {
   LOGIN_RETURN_COOKIE,
   LOGIN_RETURN_COOKIE_MAX_AGE_SECONDS,
   safeLoginReturnPath,
-} from "@/lib/login-return";
-import type { Database } from "@/lib/supabase/types";
+} from "../login-return";
+import type { Database } from "./types";
 
 const PUBLIC_PATHS = new Set(["/login", "/access-denied", "/api/health", "/offline.html"]);
 
@@ -20,6 +20,29 @@ function privateNoStore(response: NextResponse) {
   return response;
 }
 
+function setLoginReturnCookie(response: NextResponse, request: NextRequest, returnPath: unknown) {
+  response.cookies.set({
+    name: LOGIN_RETURN_COOKIE,
+    value: safeLoginReturnPath(returnPath),
+    httpOnly: true,
+    maxAge: LOGIN_RETURN_COOKIE_MAX_AGE_SECONDS,
+    path: "/",
+    priority: "high",
+    sameSite: "lax",
+    secure: request.nextUrl.protocol === "https:",
+  });
+  return response;
+}
+
+function cleanLegacyLoginUrl(request: NextRequest) {
+  const cleanLoginUrl = request.nextUrl.clone();
+  const legacyNextPath = cleanLoginUrl.searchParams.get("next");
+  cleanLoginUrl.search = "";
+
+  const response = privateNoStore(NextResponse.redirect(cleanLoginUrl));
+  return legacyNextPath ? setLoginReturnCookie(response, request, legacyNextPath) : response;
+}
+
 function unauthenticatedResponse(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/")) {
     return privateNoStore(NextResponse.json({ error: "Authentication required." }, { status: 401 }));
@@ -29,17 +52,7 @@ function unauthenticatedResponse(request: NextRequest) {
   loginUrl.pathname = "/login";
   loginUrl.search = "";
   const response = privateNoStore(NextResponse.redirect(loginUrl));
-  response.cookies.set({
-    name: LOGIN_RETURN_COOKIE,
-    value: safeLoginReturnPath(`${request.nextUrl.pathname}${request.nextUrl.search}`),
-    httpOnly: true,
-    maxAge: LOGIN_RETURN_COOKIE_MAX_AGE_SECONDS,
-    path: "/",
-    priority: "high",
-    sameSite: "lax",
-    secure: request.nextUrl.protocol === "https:",
-  });
-  return response;
+  return setLoginReturnCookie(response, request, `${request.nextUrl.pathname}${request.nextUrl.search}`);
 }
 
 function forbiddenResponse(request: NextRequest) {
@@ -51,6 +64,10 @@ function forbiddenResponse(request: NextRequest) {
 }
 
 export async function updateSession(request: NextRequest) {
+  if (request.nextUrl.pathname === "/login" && request.nextUrl.search) {
+    return cleanLegacyLoginUrl(request);
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
