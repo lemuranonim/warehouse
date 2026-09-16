@@ -20,27 +20,12 @@ type ScanResult = {
   display_payload?: Record<string, Json | undefined>;
 };
 
-const guidance: Record<ScanMode, { validation: string; result: string }> = {
-  "Inventory Lookup": {
-    validation: "Token aktif, role WMS, dan cakupan warehouse",
-    result: "Lookup terhubung ke RPC dan audit scan event.",
-  },
-  Putaway: {
-    validation: "Scan LPN diterima, lalu scan lokasi storage",
-    result: "Konfirmasi dijalankan atomik dengan idempotency key.",
-  },
-  Picking: {
-    validation: "Validasi token LPN; konfirmasi task dilakukan pada antrean Picking",
-    result: "Token dicocokkan ke database dan scan dicatat untuk audit.",
-  },
-  Dispatch: {
-    validation: "Validasi token DN/LPN; dispatch final dilakukan oleh Checker",
-    result: "Token dicocokkan ke database dan scan dicatat untuk audit.",
-  },
-  "Cycle Count": {
-    validation: "Validasi token; input aktual dilakukan pada sesi Cycle Count",
-    result: "Token dicocokkan ke database dan scan dicatat untuk audit.",
-  },
+const guidance: Record<ScanMode, string> = {
+  "Inventory Lookup": "Scan LPN, lokasi, material, atau dokumen untuk melihat datanya.",
+  Putaway: "Scan LPN terlebih dahulu, lalu scan lokasi penyimpanan tujuan.",
+  Picking: "Scan LPN yang tercantum pada tugas picking aktif.",
+  Dispatch: "Scan delivery note atau LPN yang siap dikirim.",
+  "Cycle Count": "Scan LPN atau lokasi yang sedang dihitung.",
 };
 
 function friendlyError(message?: string) {
@@ -260,10 +245,9 @@ export function ScannerConsole() {
         <pre className="scan-output">{history.join("\n")}</pre>
 
         <div style={{ marginTop: 16 }}>
-          <p className="field-label">Pengecekan Aktif</p>
+          <p className="field-label">Instruksi</p>
           <div className="scanner-guidance">
-            <p><CheckCircle2 aria-hidden size={13} /> {guidance[mode].validation}</p>
-            <p className="muted small">{guidance[mode].result}</p>
+            <p><CheckCircle2 aria-hidden size={13} /> {guidance[mode]}</p>
           </div>
         </div>
       </aside>

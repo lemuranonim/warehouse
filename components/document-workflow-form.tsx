@@ -30,27 +30,27 @@ export function DocumentWorkflowForm({
   });
 
   return <WmsActionForm action={action} submitLabel={kind === "inbound" ? "Buat ASN" : "Buat Order"}>
-    <label className="wms-field"><span>Doc No *</span><input name="doc_no" required /></label>
+    <label className="wms-field"><span>Nomor Dokumen *</span><input name="doc_no" placeholder={kind === "inbound" ? "Contoh: ASN-2026-0001" : "Contoh: OUT-2026-0001"} required /></label>
     <label className="wms-field"><span>Tanggal</span><input name="document_date" type="date" /></label>
     {kind === "inbound" ? <>
-      <label className="wms-field"><span>Pengirim</span><input name="sender" /></label>
+      <label className="wms-field"><span>Pengirim</span><input name="sender" placeholder="Nama pemasok atau asal barang" /></label>
       <label className="wms-field"><span>Tujuan</span><input defaultValue="Advanta Seeds Warehouse" name="destination" /></label>
     </> : <>
-      <label className="wms-field"><span>Origin</span><select name="origin"><option value="">Pilih</option>{warehouses.map(value => <option key={value}>{value}</option>)}</select></label>
-      <label className="wms-field"><span>Destination</span><input name="destination" /></label>
+      <label className="wms-field"><span>Warehouse Asal</span><select name="origin"><option value="">Pilih warehouse</option>{warehouses.map(value => <option key={value}>{value}</option>)}</select></label>
+      <label className="wms-field"><span>Tujuan Pengiriman</span><input name="destination" placeholder="Nama atau kota tujuan" /></label>
     </>}
     <input name="items_json" type="hidden" value={JSON.stringify(payload)} />
     <div className="document-lines-editor">
       {lines.map((line, index) => <div className="document-line-row" key={index}>
-        <strong>Line {index + 1}</strong>
-        <label className="wms-field"><span>Material *</span><select required value={line.material_code} onChange={event => update(index, "material_code", event.target.value)}><option value="">Pilih</option>{materials.map(material => <option key={material.code} value={material.code}>{material.code} — {material.label}</option>)}</select></label>
-        <label className="wms-field"><span>Lot {kind === "inbound" ? "*" : "(FEFO jika kosong)"}</span><input required={kind === "inbound"} value={line.lot_number} onChange={event => update(index, "lot_number", event.target.value)} /></label>
-        <label className="wms-field"><span>Qty KG *</span><input min="0.001" required step="0.001" type="number" value={line.qty_kg} onChange={event => update(index, "qty_kg", event.target.value)} /></label>
+        <strong>Baris {index + 1}</strong>
+        <label className="wms-field"><span>Material *</span><select required value={line.material_code} onChange={event => update(index, "material_code", event.target.value)}><option value="">Pilih material</option>{materials.map(material => <option key={material.code} value={material.code}>{material.code} — {material.label}</option>)}</select></label>
+        <label className="wms-field"><span>Lot {kind === "inbound" ? "*" : "(kosong = FEFO)"}</span><input placeholder={kind === "inbound" ? "Nomor lot" : "Opsional"} required={kind === "inbound"} value={line.lot_number} onChange={event => update(index, "lot_number", event.target.value)} /></label>
+        <label className="wms-field"><span>Kuantitas (KG) *</span><input min="0.001" placeholder="0.000" required step="0.001" type="number" value={line.qty_kg} onChange={event => update(index, "qty_kg", event.target.value)} /></label>
         {kind === "inbound" ? <>
           <label className="wms-field"><span>Exp Date</span><input type="date" value={line.exp_date} onChange={event => update(index, "exp_date", event.target.value)} /></label>
           <label className="wms-field"><span>Stock Type</span><select value={line.stock_type} onChange={event => update(index, "stock_type", event.target.value)}>{stockTypes.map(value => <option key={value}>{value}</option>)}</select></label>
         </> : null}
-        <label className="wms-field"><span>Remark</span><input value={line.remark} onChange={event => update(index, "remark", event.target.value)} /></label>
+        <label className="wms-field"><span>Catatan</span><input placeholder="Opsional" value={line.remark} onChange={event => update(index, "remark", event.target.value)} /></label>
         {lines.length > 1 ? <button className="secondary-button" onClick={() => setLines(current => current.filter((_, lineIndex) => lineIndex !== index))} type="button">Hapus</button> : null}
       </div>)}
       <button className="secondary-button" disabled={lines.length >= 100} onClick={() => setLines(current => [...current, blankLine(stockTypes[0])])} type="button">+ Tambah Baris</button>

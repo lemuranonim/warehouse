@@ -17,7 +17,7 @@ export default async function ReceivingPage() {
     <PageHeader eyebrow="Goods receiving · live" icon={ClipboardCheck} title="Verifikasi Penerimaan" description="Konfirmasi kuantitas aktual per line. Sistem membuat LPN, token QR, lot, dan movement inbound atomik." />
     <section className="section"><WmsActionForm action={receiveInboundAction} submitLabel="Post Penerimaan">
       <label className="wms-field wide"><span>Line ASN *</span><select name="inbound_item_id" required><option value="">Pilih line</option>{openItems.map(item => { const m = materialById.get(item.material_id); const d = docById.get(item.inbound_doc_id); return <option key={item.id} value={item.id}>{d?.doc_no} · {m?.material_code} · {item.lot_number} · sisa {formatKg(item.planned_qty_kg - (item.received_qty_kg ?? 0))} KG</option>; })}</select></label>
-      <label className="wms-field"><span>Qty Aktual KG *</span><input min="0.001" name="actual_qty_kg" required step="0.001" type="number" /></label>
+      <label className="wms-field"><span>Kuantitas Aktual (KG) *</span><input min="0.001" name="actual_qty_kg" placeholder="0.000" required step="0.001" type="number" /></label>
       <label className="wms-field"><span>LPN Code (opsional)</span><input name="lpn_code" placeholder="Otomatis bila kosong" /></label>
     </WmsActionForm></section>
     <section className="section"><DataTable columns={[

@@ -14,8 +14,8 @@ export default async function PutawayPage() {
       <PageHeader
         eyebrow="Putaway"
         icon={PackageCheck}
-        title="Confirm LPN into storage location."
-        description="Scan the received LPN, scan the destination bin, and close the putaway task once the location is correct."
+        title="Putaway LPN"
+        description="Scan LPN yang diterima, lalu scan lokasi penyimpanan tujuan."
       />
       <section className="section">
         <ScannerConsole />

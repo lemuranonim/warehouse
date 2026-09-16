@@ -11,13 +11,13 @@ export default async function ShippingPage() {
   const { documents, notes, tasks, items } = await getShippingData();
   const stagedDocs = documents.filter(doc => doc.status === "staged"); const dispatchable = documents.filter(doc => doc.status === "dn_created");
   return <div className="page">
-    <PageHeader eyebrow="Dispatch · live" icon={FileCheck} title="Delivery Note & Dispatch" description="Buat DN setelah seluruh task staged, lalu dispatch atomik untuk mengurangi saldo dan menutup pengiriman." />
+    <PageHeader eyebrow="Pengiriman · live" icon={FileCheck} title="Delivery Note & Pengiriman" description="Buat delivery note, lalu konfirmasi pengiriman setelah seluruh barang berada di staging." />
     <section className="grid grid-2">
       <div><div className="section-header"><h2 className="section-title">Buat Delivery Note</h2></div><WmsActionForm action={createDeliveryNoteAction} submitLabel="Buat DN">
         <label className="wms-field wide"><span>Staged Order *</span><select name="outbound_document_id" required><option value="">Pilih order</option>{stagedDocs.map(doc => <option key={doc.id} value={doc.id}>{doc.doc_no} · {doc.destination ?? "-"}</option>)}</select></label>
-        <label className="wms-field"><span>DN No *</span><input name="delivery_note_no" required /></label>
+        <label className="wms-field"><span>Nomor Delivery Note *</span><input name="delivery_note_no" placeholder="Contoh: DN-2026-0001" required /></label>
       </WmsActionForm></div>
-      <div><div className="section-header"><h2 className="section-title">Konfirmasi Dispatch</h2></div><WmsActionForm action={dispatchOutboundAction} submitLabel="Confirm Dispatch">
+      <div><div className="section-header"><h2 className="section-title">Konfirmasi Pengiriman</h2></div><WmsActionForm action={dispatchOutboundAction} submitLabel="Konfirmasi Pengiriman">
         <label className="wms-field wide"><span>Order dengan DN *</span><select name="outbound_document_id" required><option value="">Pilih order</option>{dispatchable.map(doc => <option key={doc.id} value={doc.id}>{doc.doc_no} · {notes.find(note => note.outbound_doc_id === doc.id)?.dn_no}</option>)}</select></label>
       </WmsActionForm></div>
     </section>

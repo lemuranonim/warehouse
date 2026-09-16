@@ -11,9 +11,9 @@ export default async function StockTypesPage() {
   return <div className="page">
     <PageHeader eyebrow="Stock classification · live" icon={Database} title="Tipe Stok Benih" description="Klasifikasi stok yang digunakan konsisten pada penerimaan, LPN, dan laporan." />
     <section className="section"><WmsActionForm action={saveStockTypeAction} submitLabel="Simpan Tipe">
-      <label className="wms-field"><span>Kode *</span><input maxLength={10} name="stock_code" required /></label>
-      <label className="wms-field"><span>Label *</span><input name="stock_label" required /></label>
-      <label className="wms-field wide"><span>Deskripsi</span><input name="stock_description" /></label>
+      <label className="wms-field"><span>Kode *</span><input maxLength={10} name="stock_code" placeholder="Contoh: FS" required /></label>
+      <label className="wms-field"><span>Nama Tipe *</span><input name="stock_label" placeholder="Contoh: Fresh Seed" required /></label>
+      <label className="wms-field wide"><span>Deskripsi</span><input name="stock_description" placeholder="Keterangan singkat" /></label>
       <label className="wms-field"><span>Warna</span><select name="stock_color"><option>green</option><option>blue</option><option>amber</option><option>red</option><option>violet</option><option>cyan</option><option>gray</option></select></label>
     </WmsActionForm></section>
     <section className="section"><DataTable columns={[

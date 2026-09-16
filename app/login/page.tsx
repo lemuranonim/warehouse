@@ -78,11 +78,11 @@ export default function LoginPage() {
           {/* Feature pills */}
           <div style={{ display: "flex", flexDirection: "column", gap: 10, alignItems: "flex-start" }}>
             {[
-              "📦 Inventory & LPN Management",
-              "🚚 Inbound / Outbound Control",
-              "📍 Putaway & Pick Tasks",
-              "🔄 Cycle Count & Stock Adjustment",
-              "📊 Real-time Dashboard"
+              "📦 Inventori & LPN",
+              "🚚 Inbound & Outbound",
+              "📍 Putaway & Picking",
+              "🔄 Cycle Count & Adjustment",
+              "📊 Dashboard Real-time"
             ].map((feat) => (
               <div key={feat} style={{
                 display: "flex", alignItems: "center", gap: 10,
@@ -184,7 +184,7 @@ export default function LoginPage() {
             />
             <div style={{ textAlign: "left" }}>
               <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "#b3c0d4" }}>
-                WMS v1.0.0 · Production Candidate
+                WMS v1.0.0 · Production
               </p>
               <p style={{ fontSize: "0.62rem", color: "#b3c0d4" }}>
                 PT Advanta Seeds Indonesia

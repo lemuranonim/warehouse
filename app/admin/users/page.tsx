@@ -15,11 +15,11 @@ export default async function UsersPage() {
   return <div className="page">
     <PageHeader eyebrow="RBAC · live" icon={Users} title="User & Role Management" description="Aktifkan akun Auth yang sudah terdaftar, berikan role, dan batasi cakupan warehouse." />
     <section className="section"><WmsActionForm action={setUserAccessAction} submitLabel="Simpan Akses">
-      <label className="wms-field"><span>Email akun Supabase *</span><input name="user_email" required type="email" /></label>
-      <label className="wms-field"><span>Nama lengkap *</span><input name="profile_name" required /></label>
+      <label className="wms-field"><span>Email Akun *</span><input name="user_email" placeholder="nama@advantaindonesia.com" required type="email" /></label>
+      <label className="wms-field"><span>Nama Lengkap *</span><input name="profile_name" placeholder="Nama pengguna" required /></label>
       <label className="wms-field"><span>Role *</span><select name="role_name" required>{roles.map(role => <option key={role.id}>{role.name}</option>)}</select></label>
       <label className="wms-field"><span>Default warehouse</span><select name="default_warehouse"><option value="">Tidak dibatasi</option>{warehouses.map(w => <option key={w.id} value={w.warehouse_code}>{w.warehouse_code}</option>)}</select></label>
-      <label className="wms-field wide"><span>Scope warehouse (pisahkan koma, atau All)</span><input defaultValue="All" name="warehouse_codes" /></label>
+      <label className="wms-field wide"><span>Cakupan Warehouse</span><input defaultValue="All" name="warehouse_codes" placeholder="All atau WH-01, WH-02" /></label>
     </WmsActionForm></section>
     <div className="inventory-message warning">Akun harus dibuat lebih dulu di Supabase Auth. Menambah role di sini tidak menghapus role lain yang sudah aktif.</div>
     <section className="section"><DataTable columns={[

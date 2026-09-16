@@ -13,9 +13,9 @@ export default async function PickingPage() {
   const lpnById = new Map(lpns.map(lpn => [lpn.id, lpn])); const locationById = new Map(locations.map(location => [location.id, location.location_code]));
   const rows = tasks.map(task => { const item = itemById.get(task.outbound_item_id); return { ...task, item, doc: item ? docById.get(item.outbound_doc_id) : undefined, lpn: lpnById.get(task.lpn_id), location: task.from_location_id ? locationById.get(task.from_location_id) : "-" }; });
   return <div className="page">
-    <PageHeader eyebrow="Picking · live" icon={ClipboardList} title="Picking Tasks" description="Konfirmasi task yang dialokasikan. Partial pick otomatis membuat child LPN tanpa merusak histori saldo." />
-    <section className="section"><WmsActionForm action={pickTaskAction} submitLabel="Confirm Pick">
-      <label className="wms-field wide"><span>Task *</span><select name="picking_task_id" required><option value="">Pilih task</option>{rows.filter(task => task.status === "open").map(task => <option key={task.id} value={task.id}>{task.doc?.doc_no} · {task.lpn?.lpn_code} · {task.location} · {formatKg(task.qty_kg)} KG</option>)}</select></label>
+    <PageHeader eyebrow="Picking · live" icon={ClipboardList} title="Tugas Picking" description="Pilih tugas terbuka dan konfirmasi pengambilan LPN dari lokasi yang ditentukan." />
+    <section className="section"><WmsActionForm action={pickTaskAction} submitLabel="Konfirmasi Picking">
+      <label className="wms-field wide"><span>Tugas Picking *</span><select name="picking_task_id" required><option value="">Pilih tugas</option>{rows.filter(task => task.status === "open").map(task => <option key={task.id} value={task.id}>{task.doc?.doc_no} · {task.lpn?.lpn_code} · {task.location} · {formatKg(task.qty_kg)} KG</option>)}</select></label>
     </WmsActionForm></section>
     <section className="section"><DataTable columns={[
       { key: "order", header: "Order", render: row => row.doc?.doc_no ?? "-" },

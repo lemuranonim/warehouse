@@ -1,31 +1,59 @@
 import {
   Activity,
   Boxes,
+  ClipboardCheck,
+  ClipboardList,
   Gauge,
   History,
+  MapPinCheck,
   PackageCheck,
   PackagePlus,
-  TrendingUp,
+  ScanLine,
+  Search,
+  ShieldCheck,
   Truck,
   Zap
 } from "lucide-react";
 import { DataTable } from "@/components/data-table";
 import { MetricCard } from "@/components/metric-card";
 import { PageHeader } from "@/components/page-header";
-import { ProcessMap } from "@/components/process-map";
 import { StatusBadge } from "@/components/status-badge";
-import { WorkflowBoard } from "@/components/workflow-board";
+import { WorkspaceLinkCard } from "@/components/workspace-link-card";
 import {
-  workflowSteps
-} from "@/lib/demo-data";
+  ADMIN_ROLES,
+  CHECKER_ROLES,
+  OPERATOR_ROLES,
+  SUPERVISOR_ROLES,
+  hasAllowedRole,
+  type WmsRole,
+} from "@/lib/access-control";
 import { formatKg, formatNumber } from "@/lib/format";
 import { requirePageAccess } from "@/lib/auth";
 import { getDashboardData } from "@/lib/supabase/queries";
 
+const workspaceActions: Array<{
+  href: string;
+  title: string;
+  description: string;
+  icon: typeof ScanLine;
+  tone: "blue" | "green" | "amber" | "violet";
+  roles: readonly WmsRole[] | null;
+}> = [
+  { href: "/operator/scan", title: "Scan Barcode", description: "Validasi LPN, lokasi, atau dokumen", icon: ScanLine, tone: "blue", roles: null },
+  { href: "/operator/lookup", title: "Cari Inventori", description: "Cek saldo, lot, dan lokasi LPN", icon: Search, tone: "violet", roles: null },
+  { href: "/admin/inbound", title: "Buat Inbound", description: "Siapkan ASN barang masuk", icon: PackagePlus, tone: "green", roles: ADMIN_ROLES },
+  { href: "/checker/receiving", title: "Terima Barang", description: "Verifikasi kuantitas aktual", icon: ClipboardCheck, tone: "green", roles: CHECKER_ROLES },
+  { href: "/operator/putaway", title: "Putaway", description: "Pindahkan LPN ke lokasi simpan", icon: MapPinCheck, tone: "blue", roles: OPERATOR_ROLES },
+  { href: "/operator/picking", title: "Picking", description: "Kerjakan tugas pengambilan", icon: ClipboardList, tone: "amber", roles: OPERATOR_ROLES },
+  { href: "/checker/shipping", title: "Kirim Barang", description: "Buat DN dan konfirmasi dispatch", icon: Truck, tone: "amber", roles: CHECKER_ROLES },
+  { href: "/supervisor/adjustments", title: "Koreksi Stok", description: "Review penyesuaian inventori", icon: ShieldCheck, tone: "violet", roles: SUPERVISOR_ROLES },
+];
+
 export default async function DashboardPage() {
-  await requirePageAccess();
+  const access = await requirePageAccess();
   const dashboard = await getDashboardData();
   const { metrics, currentStock: stock, movements: stockMovements } = dashboard;
+  const availableActions = workspaceActions.filter((action) => hasAllowedRole(access.roles, action.roles));
 
   return (
     <div className="page">
@@ -36,8 +64,8 @@ export default async function DashboardPage() {
           </span>
         }
         eyebrow="Inventory Overview"
-        title="Inventory Control Tower"
-        description="Monitor stok tersedia, status LPN, dan progress operasional gudang PT Advanta Seeds Indonesia secara real-time."
+        title="Ringkasan Inventori"
+        description="Saldo, aktivitas terbaru, dan akses cepat pekerjaan warehouse dalam satu layar."
       />
 
       {dashboard.source !== "live" ? (
@@ -54,8 +82,6 @@ export default async function DashboardPage() {
           label="On Hand"
           tone="blue"
           value={`${formatKg(metrics.totalStockKg)} KG`}
-          trend="↑ 3.2%"
-          trendUp={true}
         />
         <MetricCard
           helper="Siap untuk alokasi"
@@ -63,8 +89,6 @@ export default async function DashboardPage() {
           label="Available"
           tone="green"
           value={`${formatKg(metrics.availableStockKg)} KG`}
-          trend="↑ 1.8%"
-          trendUp={true}
         />
         <MetricCard
           helper="Transaksi terposting hari ini"
@@ -72,8 +96,6 @@ export default async function DashboardPage() {
           label="Transactions"
           tone="amber"
           value={formatNumber(metrics.movementCount)}
-          trend="↑ 12"
-          trendUp={true}
         />
         <MetricCard
           helper="SKU aktif dalam master"
@@ -85,35 +107,19 @@ export default async function DashboardPage() {
       </section>
 
       {/* Activity bar */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 20,
-        marginTop: 16,
-        padding: "13px 20px",
-        background: "var(--surface)",
-        border: "1px solid var(--line)",
-        borderRadius: "var(--radius)",
-        boxShadow: "var(--shadow-xs)",
-        flexWrap: "wrap",
-        borderLeft: "3px solid var(--green)"
-      }}>
+      <div className="activity-strip">
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <Zap size={13} style={{ color: "var(--amber)" }} />
-          <span style={{
-            fontSize: "0.68rem", color: "var(--muted)",
-            fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em"
-          }}>
+          <span className="activity-strip-title">
             Aktivitas Hari Ini
           </span>
         </div>
-        <div style={{ width: 1, height: 18, background: "var(--line)" }} />
         {[
           { icon: PackagePlus, label: "Diterima", value: `${formatKg(metrics.inboundKg)} KG`, color: "var(--green)" },
           { icon: Truck,       label: "Dikirim", value: `${formatKg(metrics.outboundKg)} KG`, color: "var(--navy)" },
           { icon: Activity,    label: "Transaksi", value: formatNumber(metrics.movementCount), color: "var(--amber)" },
         ].map(({ icon: Icon, label, value, color }) => (
-          <div key={label} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <div className="activity-strip-item" key={label}>
             <Icon size={13} style={{ color }} />
             <span style={{ fontSize: "0.78rem", color: "var(--muted)" }}>{label}:</span>
             <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--ink-2)" }}>{value}</span>
@@ -121,26 +127,17 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Workflow */}
+      {/* Direct workspaces */}
       <section className="section">
         <div className="section-header">
           <div>
-            <h2 className="section-title">Alur Gudang</h2>
-            <p className="section-subtitle">
-              Penerimaan inbound, putaway, alokasi, picking, staging, pengiriman, dan cycle count.
-            </p>
+            <h2 className="section-title">Mulai Pekerjaan</h2>
+            <p className="section-subtitle">Pilih tugas yang akan dikerjakan sekarang.</p>
           </div>
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            fontSize: "0.7rem", fontWeight: 700,
-            color: "var(--green)", background: "var(--green-light)",
-            padding: "4px 10px", borderRadius: 6,
-            border: "1px solid var(--green-mid)"
-          }}>
-            <TrendingUp size={11} /> Blueprint workflow
-          </span>
         </div>
-        <WorkflowBoard steps={workflowSteps} />
+        <div className="workspace-link-grid">
+          {availableActions.map((action) => <WorkspaceLinkCard key={action.href} {...action} />)}
+        </div>
       </section>
 
       {/* Tables */}
@@ -220,28 +217,6 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Process Map */}
-      <section className="section">
-        <div className="section-header">
-          <div>
-            <h2 className="section-title">Progress Pekerjaan</h2>
-            <p className="section-subtitle">
-              Handoff operasional antar perencana, penerimaan, operator, checker, dan supervisor.
-            </p>
-          </div>
-          <div className="toolbar">
-            <span className="secondary-button">
-              <PackagePlus aria-hidden size={14} />
-              Diterima {formatKg(metrics.inboundKg)} KG
-            </span>
-            <span className="secondary-button">
-              <Truck aria-hidden size={14} />
-              Dikirim {formatKg(metrics.outboundKg)} KG
-            </span>
-          </div>
-        </div>
-        <ProcessMap />
-      </section>
     </div>
   );
 }

@@ -13,19 +13,19 @@ export default async function LocationsPage() {
     <PageHeader eyebrow="Location master · live" icon={MapPinned} title="Warehouse & Location Master" description="Konfigurasi gudang, receiving, storage, staging, dan loading. Token scan lokasi dibuat otomatis." />
     <section className="grid grid-2">
       <div><div className="section-header"><h2 className="section-title">Warehouse</h2></div><WmsActionForm action={saveWarehouseAction} submitLabel="Simpan Warehouse">
-        <label className="wms-field"><span>Kode *</span><input name="warehouse_code" required /></label>
-        <label className="wms-field"><span>Nama *</span><input name="warehouse_name" required /></label>
-        <label className="wms-field"><span>Site</span><input name="site_name" /></label>
+        <label className="wms-field"><span>Kode Warehouse *</span><input name="warehouse_code" placeholder="Contoh: WH-01" required /></label>
+        <label className="wms-field"><span>Nama Warehouse *</span><input name="warehouse_name" placeholder="Nama gudang" required /></label>
+        <label className="wms-field"><span>Site</span><input name="site_name" placeholder="Lokasi site" /></label>
       </WmsActionForm></div>
       <div><div className="section-header"><h2 className="section-title">Lokasi</h2></div><WmsActionForm action={saveLocationAction} submitLabel="Simpan Lokasi">
-        <label className="wms-field"><span>Kode Lokasi *</span><input name="location_code" required /></label>
-        <label className="wms-field"><span>Warehouse *</span><select name="warehouse_code" required><option value="">Pilih</option>{warehouses.map(w => <option key={w.id} value={w.warehouse_code}>{w.warehouse_code}</option>)}</select></label>
+        <label className="wms-field"><span>Kode Lokasi *</span><input name="location_code" placeholder="Contoh: WH01-A01-R01-B01" required /></label>
+        <label className="wms-field"><span>Warehouse *</span><select name="warehouse_code" required><option value="">Pilih warehouse</option>{warehouses.map(w => <option key={w.id} value={w.warehouse_code}>{w.warehouse_code}</option>)}</select></label>
         <label className="wms-field"><span>Tipe *</span><select name="location_type"><option value="receiving">Receiving</option><option value="storage">Storage</option><option value="staging">Staging</option><option value="loading">Loading</option><option value="quarantine">Quarantine</option></select></label>
-        <label className="wms-field"><span>Kapasitas KG</span><input min="0.001" name="capacity_kg" step="0.001" type="number" /></label>
-        <label className="wms-field"><span>Room</span><input name="room_name" /></label>
-        <label className="wms-field"><span>Aisle</span><input name="aisle_name" /></label>
-        <label className="wms-field"><span>Rack</span><input name="rack_name" /></label>
-        <label className="wms-field"><span>Level / Bin</span><input name="level_name" /></label>
+        <label className="wms-field"><span>Kapasitas (KG)</span><input min="0.001" name="capacity_kg" placeholder="0.000" step="0.001" type="number" /></label>
+        <label className="wms-field"><span>Room</span><input name="room_name" placeholder="Opsional" /></label>
+        <label className="wms-field"><span>Aisle</span><input name="aisle_name" placeholder="Opsional" /></label>
+        <label className="wms-field"><span>Rack</span><input name="rack_name" placeholder="Opsional" /></label>
+        <label className="wms-field"><span>Level / Bin</span><input name="level_name" placeholder="Opsional" /></label>
       </WmsActionForm></div>
     </section>
     <section className="section"><DataTable columns={[

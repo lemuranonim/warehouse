@@ -42,37 +42,37 @@ type NavItem = {
 
 const navGroups: Array<{ title: string; items: NavItem[] }> = [
   {
-    title: "Overview",
+    title: "Ringkasan",
     items: [
-      { href: "/", label: "Inventory Overview", icon: Home },
-      { href: "/admin", label: "Control Tower", icon: Gauge, roles: ADMIN_ROLES },
-      { href: "/operator/scan", label: "Scan Workstation", icon: ScanLine },
+      { href: "/", label: "Ringkasan Inventori", icon: Home },
+      { href: "/admin", label: "Panel Admin", icon: Gauge, roles: ADMIN_ROLES },
+      { href: "/operator/scan", label: "Scan Barcode", icon: ScanLine },
     ],
   },
   {
     title: "Admin",
     items: [
-      { href: "/admin/materials", label: "Item Master", icon: Boxes, roles: ADMIN_ROLES },
-      { href: "/admin/stock-types", label: "Stock Types", icon: Database, roles: ADMIN_ROLES },
-      { href: "/admin/inventory", label: "Inventory Database", icon: Database, roles: SUPERVISOR_ROLES },
-      { href: "/admin/locations", label: "Location Master", icon: MapPinned, roles: ADMIN_ROLES },
-      { href: "/admin/inbound", label: "Inbound Orders", icon: PackagePlus, roles: ADMIN_ROLES },
-      { href: "/admin/labels", label: "Label Printing", icon: QrCode, roles: ADMIN_ROLES },
-      { href: "/admin/outbound", label: "Outbound Orders", icon: Truck, roles: SUPERVISOR_ROLES },
-      { href: "/admin/audit", label: "Inventory Transactions", icon: History, roles: SUPERVISOR_ROLES },
-      { href: "/admin/users", label: "Users & Roles", icon: UserRound, roles: ADMIN_ROLES },
+      { href: "/admin/materials", label: "Master Material", icon: Boxes, roles: ADMIN_ROLES },
+      { href: "/admin/stock-types", label: "Tipe Stok", icon: Database, roles: ADMIN_ROLES },
+      { href: "/admin/inventory", label: "Database Inventori", icon: Database, roles: SUPERVISOR_ROLES },
+      { href: "/admin/locations", label: "Master Lokasi", icon: MapPinned, roles: ADMIN_ROLES },
+      { href: "/admin/inbound", label: "Order Inbound", icon: PackagePlus, roles: ADMIN_ROLES },
+      { href: "/admin/labels", label: "Cetak Label LPN", icon: QrCode, roles: ADMIN_ROLES },
+      { href: "/admin/outbound", label: "Order Outbound", icon: Truck, roles: SUPERVISOR_ROLES },
+      { href: "/admin/audit", label: "Transaksi & Audit", icon: History, roles: SUPERVISOR_ROLES },
+      { href: "/admin/users", label: "Pengguna & Role", icon: UserRound, roles: ADMIN_ROLES },
     ],
   },
   {
-    title: "Operations",
+    title: "Operasional",
     items: [
-      { href: "/checker/receiving", label: "Goods Receiving", icon: ClipboardCheck, roles: CHECKER_ROLES },
+      { href: "/checker/receiving", label: "Penerimaan Barang", icon: ClipboardCheck, roles: CHECKER_ROLES },
       { href: "/operator/putaway", label: "Putaway", icon: PackageCheck, roles: OPERATOR_ROLES },
-      { href: "/operator/picking", label: "Pick Tasks", icon: ClipboardList, roles: OPERATOR_ROLES },
+      { href: "/operator/picking", label: "Tugas Picking", icon: ClipboardList, roles: OPERATOR_ROLES },
       { href: "/operator/staging", label: "Staging", icon: MapPinned, roles: OPERATOR_ROLES },
-      { href: "/checker/shipping", label: "Dispatch", icon: FileCheck, roles: CHECKER_ROLES },
+      { href: "/checker/shipping", label: "Pengiriman", icon: FileCheck, roles: CHECKER_ROLES },
       { href: "/operator/cycle-count", label: "Cycle Counts", icon: Database, roles: OPERATOR_ROLES },
-      { href: "/supervisor/adjustments", label: "Stock Adjustments", icon: ShieldCheck, roles: SUPERVISOR_ROLES },
+      { href: "/supervisor/adjustments", label: "Penyesuaian Stok", icon: ShieldCheck, roles: SUPERVISOR_ROLES },
     ],
   },
 ];
@@ -193,7 +193,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <SignOutButton compact />
           </div>
-          <div className="sidebar-version">WMS v1.0 · Production candidate</div>
+          <div className="sidebar-version">WMS v1.0 · Production</div>
         </div>
       </aside>
       <main className="main">
@@ -202,7 +202,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <strong>{isLiveDataMode ? "PRODUCTION LIVE" : "DEMO READ-ONLY"}</strong>
           <span>
             {isLiveDataMode
-              ? "Seluruh modul operasional menggunakan database terpusat, kontrol role, audit trail, dan pembaruan real-time."
+              ? "Database aktif · Data diperbarui otomatis secara real-time."
               : "Data layar adalah contoh. Scanner dan posting transaksi tidak mengubah database."}
           </span>
         </div>

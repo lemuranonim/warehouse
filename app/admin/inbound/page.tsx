@@ -14,7 +14,7 @@ export default async function InboundPage() {
   const rows = items.map(item => ({ ...item, material: materialById.get(item.material_id), document: documents.find(doc => doc.id === item.inbound_doc_id) }));
   return <div className="page">
     <PageHeader eyebrow="ASN / Inbound · live" icon={PackagePlus} title="Manajemen Inbound" description="Buat rencana penerimaan. Setiap baris diterima checker menjadi LPN dan movement ledger." />
-    <section className="section"><div className="section-header"><div><h2 className="section-title">Buat ASN satu baris</h2><p className="section-subtitle">Tambahkan baris berikutnya menggunakan nomor dokumen baru atau integrasi upload batch.</p></div></div>
+    <section className="section"><div className="section-header"><div><h2 className="section-title">Buat ASN Baru</h2><p className="section-subtitle">Isi dokumen dan tambahkan seluruh material yang akan diterima.</p></div></div>
       <DocumentWorkflowForm action={createInboundAction} kind="inbound" materials={materials.map(material => ({ code: material.material_code, label: material.long_description }))} stockTypes={stockTypes.map(type => type.label)} />
     </section>
     <section className="section"><DataTable columns={[

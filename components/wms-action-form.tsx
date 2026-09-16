@@ -28,7 +28,7 @@ export function WmsActionForm({
     <form action={formAction} className={className}>
       {children}
       <button className="primary-button" disabled={pending} type="submit">
-        {pending ? "Memproses..." : submitLabel}
+        {pending ? "Mohon tunggu..." : submitLabel}
       </button>
       {state.message ? (
         <span className={`action-message ${state.status}`} role={state.status === "error" ? "alert" : "status"}>

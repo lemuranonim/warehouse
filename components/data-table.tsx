@@ -10,7 +10,7 @@ type DataTableProps<T> = {
   emptyMessage?: string;
 };
 
-export function DataTable<T>({ columns, rows, emptyMessage = "No data available" }: DataTableProps<T>) {
+export function DataTable<T>({ columns, rows, emptyMessage = "Belum ada data." }: DataTableProps<T>) {
   return (
     <div className="table-wrap">
       <table>
@@ -26,7 +26,7 @@ export function DataTable<T>({ columns, rows, emptyMessage = "No data available"
             <tr>
               <td
                 colSpan={columns.length}
-                style={{ textAlign: "center", padding: "32px", color: "var(--muted)" }}
+                className="table-empty-cell"
               >
                 {emptyMessage}
               </td>

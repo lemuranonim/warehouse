@@ -13,10 +13,10 @@ export default async function StagingPage() {
   const rows = tasks.map(task => { const item = itemById.get(task.outbound_item_id); return { ...task, doc: item ? docById.get(item.outbound_doc_id) : undefined, lpn: lpnById.get(task.picked_lpn_id ?? task.lpn_id) }; });
   const stagingLocations = locations.filter(location => ["staging", "loading"].includes(location.location_type));
   return <div className="page">
-    <PageHeader eyebrow="Staging · live" icon={MapPin} title="Staging & Loading" description="Pindahkan picked LPN ke lane staging yang sah sebelum delivery note dibuat." />
-    <section className="section"><WmsActionForm action={stageTaskAction} submitLabel="Confirm Staging">
-      <label className="wms-field wide"><span>Picked Task *</span><select name="picking_task_id" required><option value="">Pilih task</option>{rows.filter(task => task.status === "picked").map(task => <option key={task.id} value={task.id}>{task.doc?.doc_no} · {task.lpn?.lpn_code} · {formatKg(task.qty_kg)} KG</option>)}</select></label>
-      <label className="wms-field"><span>Staging Location *</span><select name="staging_location_code" required><option value="">Pilih</option>{stagingLocations.map(location => <option key={location.id}>{location.location_code}</option>)}</select></label>
+    <PageHeader eyebrow="Staging · live" icon={MapPin} title="Staging & Loading" description="Pindahkan LPN yang sudah dipicking ke area staging sebelum pengiriman." />
+    <section className="section"><WmsActionForm action={stageTaskAction} submitLabel="Konfirmasi Staging">
+      <label className="wms-field wide"><span>Tugas yang Sudah Dipicking *</span><select name="picking_task_id" required><option value="">Pilih tugas</option>{rows.filter(task => task.status === "picked").map(task => <option key={task.id} value={task.id}>{task.doc?.doc_no} · {task.lpn?.lpn_code} · {formatKg(task.qty_kg)} KG</option>)}</select></label>
+      <label className="wms-field"><span>Lokasi Staging *</span><select name="staging_location_code" required><option value="">Pilih lokasi</option>{stagingLocations.map(location => <option key={location.id}>{location.location_code}</option>)}</select></label>
     </WmsActionForm></section>
     <section className="grid grid-2"><div><div className="section-header"><h2 className="section-title">Task staging</h2></div><DataTable columns={[
       { key: "order", header: "Order", render: row => row.doc?.doc_no ?? "-" },

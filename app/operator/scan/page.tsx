@@ -6,10 +6,10 @@ export default function ScannerPage() {
   return (
     <div className="page">
       <PageHeader
-        eyebrow="Scan workstation"
+        eyebrow="Scanner Warehouse"
         icon={ScanLine}
-        title="Execute warehouse scans by task type."
-        description="Select a scan mode, capture an LPN, location, SKU, or document barcode, then continue with the validated WMS task."
+        title="Scan Barcode & QR"
+        description="Pilih jenis pekerjaan, lalu scan LPN, lokasi, material, atau dokumen."
       />
       <ScannerConsole />
     </div>

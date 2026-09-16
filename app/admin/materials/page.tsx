@@ -14,14 +14,14 @@ export default async function MaterialsPage() {
     <section className="section">
       <div className="section-header"><div><h2 className="section-title">Tambah atau perbarui material</h2><p className="section-subtitle">Material code yang sama akan diperbarui tanpa membuat duplikat.</p></div></div>
       <WmsActionForm action={saveMaterialAction} submitLabel="Simpan Material">
-        <label className="wms-field"><span>Material Code *</span><input name="material_code" required /></label>
-        <label className="wms-field wide"><span>Description *</span><input name="material_description" required /></label>
-        <label className="wms-field"><span>Hybrid</span><input name="hybrid" /></label>
-        <label className="wms-field"><span>Stage</span><input name="stage" /></label>
-        <label className="wms-field"><span>Type</span><input name="material_type" /></label>
-        <label className="wms-field"><span>Product</span><input name="product" /></label>
-        <label className="wms-field"><span>Crop</span><input name="crop" /></label>
-        <label className="wms-field"><span>Pack KG *</span><input min="0" name="package_kg" required step="0.001" type="number" /></label>
+        <label className="wms-field"><span>Kode Material *</span><input name="material_code" placeholder="Contoh: 70001234" required /></label>
+        <label className="wms-field wide"><span>Deskripsi Material *</span><input name="material_description" placeholder="Nama material lengkap" required /></label>
+        <label className="wms-field"><span>Hybrid</span><input name="hybrid" placeholder="Opsional" /></label>
+        <label className="wms-field"><span>Stage</span><input name="stage" placeholder="Opsional" /></label>
+        <label className="wms-field"><span>Tipe</span><input name="material_type" placeholder="Opsional" /></label>
+        <label className="wms-field"><span>Produk</span><input name="product" placeholder="Opsional" /></label>
+        <label className="wms-field"><span>Crop</span><input name="crop" placeholder="Opsional" /></label>
+        <label className="wms-field"><span>Ukuran Kemasan (KG) *</span><input min="0" name="package_kg" placeholder="0.000" required step="0.001" type="number" /></label>
       </WmsActionForm>
     </section>
     <section className="section"><DataTable columns={[
