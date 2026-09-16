@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const migration = readFileSync(join(process.cwd(), "supabase", "migrations", "0004_full_workflow_realtime.sql"), "utf8").toLowerCase();
 const privilegeCleanup = readFileSync(join(process.cwd(), "supabase", "migrations", "0005_wms_privilege_cleanup.sql"), "utf8").toLowerCase();
+const upsertFix = readFileSync(join(process.cwd(), "supabase", "migrations", "0006_fix_master_upsert_conflicts.sql"), "utf8").toLowerCase();
 
 describe("full workflow realtime migration", () => {
   it("covers every transactional workflow with server-side RPCs", () => {
@@ -53,5 +54,12 @@ describe("full workflow realtime migration", () => {
     expect(privilegeCleanup).toContain("revoke insert, update, delete on table %i.%i from authenticated");
     expect(privilegeCleanup).toContain("not in ('wms_profiles', 'wms_sync_queue')");
     expect(privilegeCleanup).toContain("grant update (full_name) on public.wms_profiles to authenticated");
+  });
+
+  it("uses explicit unique constraints for master-data upserts", () => {
+    expect(upsertFix).toContain("on conflict on constraint wms_warehouses_warehouse_code_key");
+    expect(upsertFix).toContain("on conflict on constraint wms_locations_location_code_key");
+    expect(upsertFix).toContain("on conflict on constraint wms_materials_material_code_key");
+    expect(upsertFix.match(/set search_path = ''/g)).toHaveLength(3);
   });
 });

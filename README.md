@@ -49,8 +49,9 @@ Project dirancang berbagi Supabase Auth dengan aplikasi Advanta lain. Semua obje
 3. `supabase/migrations/0003_production_security_hardening.sql`
 4. `supabase/migrations/0004_full_workflow_realtime.sql`
 5. `supabase/migrations/0005_wms_privilege_cleanup.sql`
+6. `supabase/migrations/0006_fix_master_upsert_conflicts.sql`
 
-Migrasi `0003` sampai `0005` wajib sebelum mode live. Migrasi `0004` menambahkan seluruh RPC workflow, audit trail, idempotency, import atomik, RLS write lockdown, dan publikasi realtime. Migrasi `0005` mencabut default privilege API yang tidak dilindungi oleh RLS.
+Migrasi `0003` sampai `0006` wajib sebelum mode live. Migrasi `0004` menambahkan seluruh RPC workflow, audit trail, idempotency, import atomik, RLS write lockdown, dan publikasi realtime. Migrasi `0005` mencabut default privilege API yang tidak dilindungi oleh RLS, sedangkan `0006` memperbaiki upsert master data pada PostgreSQL.
 
 Runbook deployment, provisioning role, batas modul, dan checklist UAT tersedia di [docs/PRODUCTION_READINESS.md](./docs/PRODUCTION_READINESS.md).
 

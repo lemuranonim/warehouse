@@ -230,7 +230,7 @@ begin
 
   insert into public.wms_warehouses (warehouse_code, name, site, is_active)
   values (trim(warehouse_code), trim(warehouse_name), nullif(trim(site_name), ''), active)
-  on conflict (warehouse_code) do update set
+  on conflict on constraint wms_warehouses_warehouse_code_key do update set
     name = excluded.name,
     site = excluded.site,
     is_active = excluded.is_active
@@ -291,7 +291,7 @@ begin
     nullif(trim(rack_name), ''), nullif(trim(level_name), ''), nullif(trim(bin_name), ''),
     location_type, capacity_kg, active
   )
-  on conflict (location_code) do update set
+  on conflict on constraint wms_locations_location_code_key do update set
     warehouse_id = excluded.warehouse_id,
     site = excluded.site,
     warehouse = excluded.warehouse,
@@ -357,7 +357,7 @@ begin
     nullif(trim(product_name), ''), nullif(trim(crop_name), ''), trim(material_status),
     coalesce(nullif(trim(order_unit_name), ''), 'KG'), package_kg, active
   )
-  on conflict (material_code) do update set
+  on conflict on constraint wms_materials_material_code_key do update set
     long_description = excluded.long_description,
     hybrid = excluded.hybrid,
     stage = excluded.stage,

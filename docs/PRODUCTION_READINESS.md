@@ -20,10 +20,10 @@ Kode dan database saat ini adalah **production candidate**, bukan pengganti pers
 
 1. Buat backup database atau pastikan point-in-time recovery aktif.
 2. Terapkan dan uji seluruh migrasi pada project staging yang strukturnya sama dengan production.
-3. Untuk instalasi baru jalankan migrasi `0001` sampai `0005` berurutan. Untuk database yang sudah memakai `0001`–`0003`, jalankan `0004` lalu `0005` setelah backup.
+3. Untuk instalasi baru jalankan migrasi `0001` sampai `0006` berurutan. Untuk database yang sudah memakai `0001`–`0003`, jalankan `0004`, `0005`, lalu `0006` setelah backup.
 4. Selesaikan rekonsiliasi data lama sebelum memvalidasi constraint historis yang dibuat `NOT VALID`.
 5. Provision user, role, default warehouse, dan warehouse scope.
-6. Deploy dengan `NEXT_PUBLIC_WMS_DATA_MODE=demo`, lakukan smoke test, lalu ubah ke `live` setelah migrasi `0005`, master data, dan UAT disetujui.
+6. Deploy dengan `NEXT_PUBLIC_WMS_DATA_MODE=demo`, lakukan smoke test, lalu ubah ke `live` setelah migrasi `0006`, master data, dan UAT disetujui.
 7. Pantau `/api/health`, log aplikasi, Supabase Auth, query latency, serta error berdasarkan `X-Request-Id`.
 
 ## Provisioning user
@@ -50,7 +50,7 @@ Gunakan `Admin` dan `Supervisor` secara terbatas karena kedua role tersebut memi
 
 ## Verifikasi keamanan database
 
-Jalankan pemeriksaan berikut sebagai administrator database setelah migrasi `0005`:
+Jalankan pemeriksaan berikut sebagai administrator database setelah migrasi `0006`:
 
 ```sql
 select has_table_privilege('anon', 'public.wms_lpns', 'select') as anon_can_read_lpns;
@@ -83,4 +83,4 @@ Hasil yang diharapkan: `false`, `false`, `true`. Lanjutkan dengan pengujian meng
 - Rate limit import saat ini disimpan per instance aplikasi. Untuk deployment multi-instance, gunakan limiter terdistribusi (misalnya Redis/KV atau gateway rate limit).
 - Health endpoint memeriksa konfigurasi wajib, bukan konektivitas mendalam ke database. Tambahkan synthetic authenticated check pada platform monitoring tanpa mempublikasikan credential.
 - Service worker hanya menyimpan offline shell dan aset statis terpilih; response berisi data user tidak disimpan di cache offline.
-- Jangan mengaktifkan mode live sebelum master data aktual, migrasi `0005`, backup/PITR, dan sign-off UAT tersedia.
+- Jangan mengaktifkan mode live sebelum master data aktual, migrasi `0006`, backup/PITR, dan sign-off UAT tersedia.
