@@ -1,5 +1,11 @@
-const CACHE_NAME = "warehouse-wms-shell-v2";
-const SAFE_ASSETS = ["/offline.html", "/manifest.webmanifest", "/icon.svg"];
+const CACHE_NAME = "warehouse-wms-shell-v3";
+const SAFE_ASSETS = [
+  "/offline.html",
+  "/manifest.webmanifest",
+  "/warehouse-logo.png",
+  "/icons/warehouse-192.png",
+  "/icons/warehouse-512.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SAFE_ASSETS)));

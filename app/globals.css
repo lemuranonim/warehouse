@@ -139,12 +139,12 @@ h1, h2, h3, h4, p { margin: 0; }
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: linear-gradient(135deg, rgba(34,64,140,0.72), rgba(13,150,104,0.34));
-  border: 1px solid rgba(26,186,106,0.22);
+  background: rgba(255,255,255,0.98);
+  border: 1px solid rgba(255,255,255,0.38);
   overflow: hidden;
   flex-shrink: 0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  padding: 4px;
+  padding: 3px;
 }
 
 .brand-mark img {
@@ -152,7 +152,7 @@ h1, h2, h3, h4, p { margin: 0; }
   height: 100%;
   object-fit: contain;
   padding: 0;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+  filter: drop-shadow(0 1px 1px rgba(13,31,64,0.16));
 }
 
 .brand strong {
@@ -327,6 +327,8 @@ h1, h2, h3, h4, p { margin: 0; }
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   overflow: hidden;
 }
+
+.login-mobile-brand { display: none; }
 
 .auth-message-page {
   min-height: 100vh;
@@ -1598,6 +1600,26 @@ tbody tr:hover td { background: var(--navy-light); }
   .login-layout { grid-template-columns: 1fr; }
   .login-brand-panel { display: none !important; }
   .login-form-panel { min-height: 100vh; padding: 32px 20px !important; }
+  .login-mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .login-mobile-brand > span {
+    display: grid;
+    place-items: center;
+    width: 66px;
+    height: 66px;
+    padding: 4px;
+    border: 1px solid var(--line-2);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .login-mobile-brand img { width: 100%; height: 100%; object-fit: contain; }
+  .login-mobile-brand strong { display: block; color: var(--navy); font-size: 1rem; }
+  .login-mobile-brand small { display: block; margin-top: 3px; color: var(--muted); font-size: 0.7rem; }
   .sidebar {
     grid-template-columns: 1fr;
     gap: 8px;

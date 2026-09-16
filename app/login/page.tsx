@@ -41,19 +41,21 @@ export default function LoginPage() {
         <div style={{ position: "relative", textAlign: "center" }}>
           <div style={{
             margin: "0 auto 24px",
-            width: 140,
-            height: 140,
-            borderRadius: 28,
+            width: 154,
+            height: 154,
+            borderRadius: 30,
             overflow: "hidden",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.3), 0 0 0 3px rgba(255,255,255,0.1)"
+            padding: 10,
+            background: "rgba(255,255,255,0.98)",
+            boxShadow: "0 14px 42px rgba(0,0,0,0.32), 0 0 0 3px rgba(255,255,255,0.12)"
           }}>
             <Image
-              src="/logo_wh.png"
-              alt="WH Warehouse Logo"
-              width={140}
-              height={140}
+              src="/warehouse-logo.png"
+              alt="Logo Warehouse WMS"
+              width={134}
+              height={134}
               priority
-              style={{ objectFit: "cover", width: "100%", height: "100%" }}
+              style={{ objectFit: "contain", width: "100%", height: "100%" }}
             />
           </div>
 
@@ -119,6 +121,15 @@ export default function LoginPage() {
         padding: "48px 56px"
       }}>
         <div style={{ width: "100%", maxWidth: 380 }}>
+          <div className="login-mobile-brand">
+            <span>
+              <Image src="/warehouse-logo.png" alt="Logo Warehouse WMS" width={58} height={58} />
+            </span>
+            <div>
+              <strong>Warehouse WMS</strong>
+              <small>PT Advanta Seeds Indonesia</small>
+            </div>
+          </div>
 
           {/* Form header */}
           <div style={{ marginBottom: 32 }}>
@@ -176,11 +187,11 @@ export default function LoginPage() {
             justifyContent: "center", gap: 10
           }}>
             <Image
-              src="/logo_wh_notitle_unbox.png"
-              alt="WH"
-              width={32}
-              height={22}
-              style={{ objectFit: "contain", opacity: 0.4 }}
+              src="/warehouse-logo.png"
+              alt="Logo Warehouse WMS"
+              width={34}
+              height={34}
+              style={{ objectFit: "contain", opacity: 0.72 }}
             />
             <div style={{ textAlign: "left" }}>
               <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "#b3c0d4" }}>

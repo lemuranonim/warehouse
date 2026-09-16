@@ -151,7 +151,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="sidebar" aria-label="Primary navigation">
         <Link className="brand" href="/">
           <span className="brand-mark">
-            <Image src="/logo_wh_notitle_unbox.png" alt="WH Logo" width={38} height={38} />
+            <Image src="/warehouse-logo.png" alt="Logo Warehouse WMS" width={40} height={40} priority />
           </span>
           <span className="brand-copy">
             <strong>Warehouse WMS</strong>
