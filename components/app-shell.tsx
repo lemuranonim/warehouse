@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Boxes,
@@ -83,6 +83,17 @@ function canShow(userRoles: readonly string[], requiredRoles?: readonly WmsRole[
   return !requiredRoles || requiredRoles.some((role) => userRoles.includes(role));
 }
 
+function NavLinkContent({ icon: Icon, label }: { icon: typeof Home; label: string }) {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      <Icon aria-hidden size={15} />
+      <span>{label}</span>
+      <span aria-hidden className={`nav-pending-indicator${pending ? " pending" : ""}`} />
+    </>
+  );
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [email, setEmail] = useState("");
@@ -92,18 +103,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     let active = true;
     async function loadIdentity() {
       const supabase = createBrowserSupabaseClient();
-      const { data: userData } = await supabase.auth.getUser();
-      if (!active || !userData.user) return;
-      setEmail(userData.user.email ?? "");
-
-      const { data: assignments } = await supabase
-        .from("wms_user_roles")
-        .select("role_id")
-        .eq("user_id", userData.user.id);
-      const roleIds = assignments?.map((assignment) => assignment.role_id) ?? [];
-      if (!roleIds.length) return;
-      const { data: roleRows } = await supabase.from("wms_roles").select("name").in("id", roleIds);
-      if (active) setRoles(roleRows?.map((role) => role.name) ?? []);
+      const { data } = await supabase.rpc("wms_current_access");
+      const access = data?.[0];
+      if (!active || !access) return;
+      setEmail(access.email ?? "");
+      setRoles(access.roles);
     }
     void loadIdentity();
     return () => { active = false; };
@@ -146,8 +150,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
                 return (
                   <Link className={`nav-link${isActive ? " active" : ""}`} href={item.href} key={item.href}>
-                    <Icon aria-hidden size={15} />
-                    <span>{item.label}</span>
+                    <NavLinkContent icon={Icon} label={item.label} />
                   </Link>
                 );
               })}

@@ -4,10 +4,10 @@ import { LabelPreview } from "@/components/label-preview";
 import { PageHeader } from "@/components/page-header";
 import { PrintButton } from "@/components/print-button";
 import { formatKg } from "@/lib/format";
-import { getInventoryWorkspaceData } from "@/lib/wms-queries";
+import { getInventoryData } from "@/lib/wms-queries";
 
 export default async function LabelsPage() {
-  const { inventory } = await getInventoryWorkspaceData();
+  const { inventory } = await getInventoryData();
   const selected = inventory[0];
   const label = selected ? { lpn: selected.lpn_code, sku: selected.material_code, lot: selected.lot_number, qty: `${formatKg(selected.qty_current_kg)} KG`, inventoryType: selected.stock_type, inboundRef: selected.inbound_doc_id?.slice(0,8) ?? "IMPORT", status: selected.status, token: selected.scan_token ?? "TOKEN-NOT-FOUND" } : null;
   return <div className="page">

@@ -4,10 +4,10 @@ import { DataTable } from "@/components/data-table";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { WmsActionForm } from "@/components/wms-action-form";
-import { getMasterData } from "@/lib/wms-queries";
+import { getStockTypeData } from "@/lib/wms-queries";
 
 export default async function StockTypesPage() {
-  const { stockTypes } = await getMasterData();
+  const { stockTypes } = await getStockTypeData();
   return <div className="page">
     <PageHeader eyebrow="Stock classification · live" icon={Database} title="Tipe Stok Benih" description="Klasifikasi stok yang digunakan konsisten pada penerimaan, LPN, dan laporan." />
     <section className="section"><WmsActionForm action={saveStockTypeAction} submitLabel="Simpan Tipe">

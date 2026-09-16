@@ -5,10 +5,10 @@ import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { WmsActionForm } from "@/components/wms-action-form";
 import { formatKg } from "@/lib/format";
-import { getOutboundData } from "@/lib/wms-queries";
+import { getPickingData } from "@/lib/wms-queries";
 
 export default async function PickingPage() {
-  const { tasks, items, documents, lpns, locations } = await getOutboundData();
+  const { tasks, items, documents, lpns, locations } = await getPickingData();
   const itemById = new Map(items.map(item => [item.id, item])); const docById = new Map(documents.map(doc => [doc.id, doc]));
   const lpnById = new Map(lpns.map(lpn => [lpn.id, lpn])); const locationById = new Map(locations.map(location => [location.id, location.location_code]));
   const rows = tasks.map(task => { const item = itemById.get(task.outbound_item_id); return { ...task, item, doc: item ? docById.get(item.outbound_doc_id) : undefined, lpn: lpnById.get(task.lpn_id), location: task.from_location_id ? locationById.get(task.from_location_id) : "-" }; });

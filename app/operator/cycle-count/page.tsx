@@ -5,11 +5,11 @@ import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { WmsActionForm } from "@/components/wms-action-form";
 import { formatKg } from "@/lib/format";
-import { getCycleAndAdjustmentData } from "@/lib/wms-queries";
+import { getCycleCountData } from "@/lib/wms-queries";
 import { getCurrentWmsAccess } from "@/lib/auth";
 
 export default async function CycleCountPage() {
-  const [{ sessions, lines, lpns, materials, locations }, access] = await Promise.all([getCycleAndAdjustmentData(), getCurrentWmsAccess()]);
+  const [{ sessions, lines, lpns, materials, locations }, access] = await Promise.all([getCycleCountData(), getCurrentWmsAccess()]);
   const canManage = access?.roles.some(role => role === "Admin" || role === "Supervisor") ?? false;
   const locationById = new Map(locations.map(location => [location.id, location])); const lpnById = new Map(lpns.map(lpn => [lpn.id, lpn])); const materialById = new Map(materials.map(material => [material.id, material]));
   const rows = lines.map(line => { const lpn = line.lpn_id ? lpnById.get(line.lpn_id) : undefined; return { ...line, lpn, material: lpn ? materialById.get(lpn.material_id) : undefined, location: line.location_id ? locationById.get(line.location_id) : undefined }; });

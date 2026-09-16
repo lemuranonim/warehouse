@@ -4,10 +4,10 @@ import { PageHeader } from "@/components/page-header";
 import { ScannerConsole } from "@/components/scanner-console";
 import { StatusBadge } from "@/components/status-badge";
 import { formatKg } from "@/lib/format";
-import { getInventoryWorkspaceData } from "@/lib/wms-queries";
+import { getInventoryData } from "@/lib/wms-queries";
 
 export default async function LookupPage() {
-  const { inventory } = await getInventoryWorkspaceData();
+  const { inventory } = await getInventoryData();
   return <div className="page">
     <PageHeader eyebrow="Inventory lookup · live" icon={Search} title="Lookup LPN & Lokasi" description="Scan token atau telusuri saldo LPN langsung dari database operasional." />
     <section className="section"><ScannerConsole /></section>

@@ -5,10 +5,10 @@ import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { WmsActionForm } from "@/components/wms-action-form";
 import { formatKg } from "@/lib/format";
-import { getCycleAndAdjustmentData } from "@/lib/wms-queries";
+import { getAdjustmentData } from "@/lib/wms-queries";
 
 export default async function AdjustmentsPage() {
-  const { adjustments, lpns, materials, locations } = await getCycleAndAdjustmentData();
+  const { adjustments, lpns, materials, locations } = await getAdjustmentData();
   const lpnById = new Map(lpns.map(lpn => [lpn.id, lpn])); const materialById = new Map(materials.map(material => [material.id, material])); const locationById = new Map(locations.map(location => [location.id, location]));
   const rows = adjustments.map(adjustment => { const lpn = lpnById.get(adjustment.lpn_id); return { ...adjustment, lpn, material: lpn ? materialById.get(lpn.material_id) : undefined, location: lpn?.current_location_id ? locationById.get(lpn.current_location_id) : undefined }; });
   return <div className="page">

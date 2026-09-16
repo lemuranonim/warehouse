@@ -6,10 +6,10 @@ import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { WmsActionForm } from "@/components/wms-action-form";
 import { formatKg } from "@/lib/format";
-import { getMasterData, getOutboundData } from "@/lib/wms-queries";
+import { getOutboundManagementData } from "@/lib/wms-queries";
 
 export default async function OutboundPage() {
-  const [{ documents, items, tasks, notes, materials }, { warehouses }] = await Promise.all([getOutboundData(), getMasterData()]);
+  const { documents, items, tasks, notes, materials, warehouses } = await getOutboundManagementData();
   const materialById = new Map(materials.map(material => [material.id, material]));
   const docById = new Map(documents.map(doc => [doc.id, doc]));
   const itemRows = items.map(item => ({ ...item, material: materialById.get(item.material_id), doc: docById.get(item.outbound_doc_id) }));

@@ -3,11 +3,11 @@ import { DataTable } from "@/components/data-table";
 import { PageHeader } from "@/components/page-header";
 import { ScannerConsole } from "@/components/scanner-console";
 import { StatusBadge } from "@/components/status-badge";
-import { getInventoryWorkspaceData } from "@/lib/wms-queries";
+import { getInventoryData } from "@/lib/wms-queries";
 import { formatKg } from "@/lib/format";
 
 export default async function PutawayPage() {
-  const { inventory } = await getInventoryWorkspaceData();
+  const { inventory } = await getInventoryData();
   const rows = inventory.filter(row => ["label_printed", "received"].includes(row.status));
   return (
     <div className="page">

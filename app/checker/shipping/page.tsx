@@ -5,10 +5,10 @@ import { DataTable } from "@/components/data-table";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { WmsActionForm } from "@/components/wms-action-form";
-import { getOutboundData } from "@/lib/wms-queries";
+import { getShippingData } from "@/lib/wms-queries";
 
 export default async function ShippingPage() {
-  const { documents, notes, tasks, items } = await getOutboundData();
+  const { documents, notes, tasks, items } = await getShippingData();
   const stagedDocs = documents.filter(doc => doc.status === "staged"); const dispatchable = documents.filter(doc => doc.status === "dn_created");
   return <div className="page">
     <PageHeader eyebrow="Dispatch · live" icon={FileCheck} title="Delivery Note & Dispatch" description="Buat DN setelah seluruh task staged, lalu dispatch atomik untuk mengurangi saldo dan menutup pengiriman." />

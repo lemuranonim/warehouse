@@ -1,29 +1,29 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { startTransition, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
-
-const realtimeTables = [
-  "wms_materials", "wms_warehouses", "wms_locations", "wms_lpns",
-  "wms_stock_movements", "wms_inbound_documents", "wms_inbound_items",
-  "wms_outbound_documents", "wms_outbound_items", "wms_picking_tasks",
-  "wms_delivery_notes", "wms_cycle_count_sessions", "wms_cycle_count_lines",
-  "wms_adjustment_requests", "wms_inventory_import_batches", "wms_scan_events",
-] as const;
+import { realtimeTablesForPath } from "@/lib/realtime-routes";
 
 export function RealtimeRefresh() {
+  const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_WMS_DATA_MODE !== "live") return;
+    const realtimeTables = realtimeTablesForPath(pathname);
+    if (!realtimeTables.length) return;
+
     const supabase = createBrowserSupabaseClient();
     let refreshTimer: ReturnType<typeof setTimeout> | undefined;
-    const channel = supabase.channel("wms-production-updates");
+    const channelKey = pathname.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "dashboard";
+    const channel = supabase.channel(`wms-production-${channelKey}`);
     for (const table of realtimeTables) {
       channel.on("postgres_changes", { event: "*", schema: "public", table }, () => {
         clearTimeout(refreshTimer);
-        refreshTimer = setTimeout(() => router.refresh(), 250);
+        refreshTimer = setTimeout(() => {
+          startTransition(() => router.refresh());
+        }, 350);
       });
     }
     channel.subscribe();
@@ -31,7 +31,7 @@ export function RealtimeRefresh() {
       clearTimeout(refreshTimer);
       void supabase.removeChannel(channel);
     };
-  }, [router]);
+  }, [pathname, router]);
 
   return null;
 }

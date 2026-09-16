@@ -5,10 +5,10 @@ import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { WmsActionForm } from "@/components/wms-action-form";
 import { formatKg } from "@/lib/format";
-import { getMasterData } from "@/lib/wms-queries";
+import { getMaterialMasterData } from "@/lib/wms-queries";
 
 export default async function MaterialsPage() {
-  const { materials } = await getMasterData();
+  const { materials } = await getMaterialMasterData();
   return <div className="page">
     <PageHeader eyebrow="Item master · live" icon={Boxes} title="Item Master" description="Kelola SKU sumber tunggal untuk inbound, inventory, alokasi FEFO, dan pelaporan." />
     <section className="section">

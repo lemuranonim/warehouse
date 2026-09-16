@@ -5,7 +5,7 @@ import { DataTable } from "@/components/data-table";
 import { StatusBadge } from "@/components/status-badge";
 import { WmsActionForm } from "@/components/wms-action-form";
 import { postInventoryBatchAction } from "@/app/actions/wms";
-import { getInventoryWorkspaceData } from "@/lib/wms-queries";
+import { getInventoryBatchData } from "@/lib/wms-queries";
 
 const fieldMappings = [
   ["Date", "stock_date", "Tanggal snapshot"],
@@ -21,7 +21,7 @@ const fieldMappings = [
 ];
 
 export default async function InventoryDatabasePage() {
-  const { batches } = await getInventoryWorkspaceData();
+  const { batches } = await getInventoryBatchData();
   return (
     <div className="page">
       <PageHeader

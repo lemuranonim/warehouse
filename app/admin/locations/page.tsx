@@ -5,10 +5,10 @@ import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { WmsActionForm } from "@/components/wms-action-form";
 import { formatKg } from "@/lib/format";
-import { getMasterData } from "@/lib/wms-queries";
+import { getLocationMasterData } from "@/lib/wms-queries";
 
 export default async function LocationsPage() {
-  const { warehouses, locations } = await getMasterData();
+  const { warehouses, locations } = await getLocationMasterData();
   return <div className="page">
     <PageHeader eyebrow="Location master · live" icon={MapPinned} title="Warehouse & Location Master" description="Konfigurasi gudang, receiving, storage, staging, dan loading. Token scan lokasi dibuat otomatis." />
     <section className="grid grid-2">

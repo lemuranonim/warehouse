@@ -1,6 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { hasAllowedRole, requiredRolesForPath } from "../access-control";
 import {
   LOGIN_RETURN_COOKIE,
   LOGIN_RETURN_COOKIE_MAX_AGE_SECONDS,
@@ -55,14 +54,6 @@ function unauthenticatedResponse(request: NextRequest) {
   return setLoginReturnCookie(response, request, `${request.nextUrl.pathname}${request.nextUrl.search}`);
 }
 
-function forbiddenResponse(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith("/api/")) {
-    return privateNoStore(NextResponse.json({ error: "You do not have access to this resource." }, { status: 403 }));
-  }
-
-  return privateNoStore(NextResponse.redirect(new URL("/access-denied", request.url)));
-}
-
 export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname === "/login" && request.nextUrl.search) {
     return cleanLegacyLoginUrl(request);
@@ -96,40 +87,11 @@ export async function updateSession(request: NextRequest) {
     return unauthenticatedResponse(request);
   }
 
-  const { data: profile } = await supabase
-    .from("wms_profiles")
-    .select("id, is_active")
-    .eq("id", userId)
-    .eq("is_active", true)
-    .maybeSingle();
-
-  if (!profile) {
-    if (request.nextUrl.pathname === "/access-denied") return response;
-    return forbiddenResponse(request);
-  }
-
-  const { data: assignments } = await supabase
-    .from("wms_user_roles")
-    .select("role_id")
-    .eq("user_id", userId);
-  const roleIds = assignments?.map((assignment) => assignment.role_id) ?? [];
-  if (!roleIds.length) {
-    if (request.nextUrl.pathname === "/access-denied") return response;
-    return forbiddenResponse(request);
-  }
-  const { data: roleRows } = roleIds.length
-    ? await supabase.from("wms_roles").select("name").in("id", roleIds)
-    : { data: [] as Array<{ name: string }> };
-  const userRoles = roleRows?.map((role) => role.name) ?? [];
-
   if (request.nextUrl.pathname === "/login") {
     const redirectResponse = privateNoStore(NextResponse.redirect(new URL("/", request.url)));
     redirectResponse.cookies.delete(LOGIN_RETURN_COOKIE);
     return redirectResponse;
   }
-
-  const allowedRoles = requiredRolesForPath(request.nextUrl.pathname);
-  if (!hasAllowedRole(userRoles, allowedRoles)) return forbiddenResponse(request);
 
   return privateNoStore(response);
 }

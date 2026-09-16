@@ -5,10 +5,10 @@ import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { WmsActionForm } from "@/components/wms-action-form";
 import { formatKg } from "@/lib/format";
-import { getInboundData } from "@/lib/wms-queries";
+import { getReceivingData } from "@/lib/wms-queries";
 
 export default async function ReceivingPage() {
-  const { documents, items, materials, lpns } = await getInboundData();
+  const { documents, items, materials, lpns } = await getReceivingData();
   const materialById = new Map(materials.map(material => [material.id, material]));
   const docById = new Map(documents.map(doc => [doc.id, doc]));
   const openItems = items.filter(item => Number(item.received_qty_kg ?? 0) < Number(item.planned_qty_kg));

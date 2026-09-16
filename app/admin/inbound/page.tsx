@@ -6,10 +6,10 @@ import { DocumentWorkflowForm } from "@/components/document-workflow-form";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { formatKg } from "@/lib/format";
-import { getInboundData, getMasterData } from "@/lib/wms-queries";
+import { getInboundManagementData } from "@/lib/wms-queries";
 
 export default async function InboundPage() {
-  const [{ documents, items, materials }, { stockTypes }] = await Promise.all([getInboundData(), getMasterData()]);
+  const { documents, items, materials, stockTypes } = await getInboundManagementData();
   const materialById = new Map(materials.map(material => [material.id, material]));
   const rows = items.map(item => ({ ...item, material: materialById.get(item.material_id), document: documents.find(doc => doc.id === item.inbound_doc_id) }));
   return <div className="page">

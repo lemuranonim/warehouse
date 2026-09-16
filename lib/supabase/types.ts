@@ -655,6 +655,17 @@ export type Database = {
       };
     };
     Functions: {
+      wms_current_access: {
+        Args: Record<PropertyKey, never>;
+        Returns: Array<{
+          user_id: string;
+          email: string | null;
+          full_name: string | null;
+          default_warehouse: string | null;
+          warehouse_scope: string[];
+          roles: string[];
+        }>;
+      };
       wms_resolve_scan_token: {
         Args: { raw_value: string; workflow: string; device_info?: Json };
         Returns: Json;
