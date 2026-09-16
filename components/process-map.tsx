@@ -1,5 +1,4 @@
 import { processMap } from "@/lib/demo-data";
-import { ArrowRight } from "lucide-react";
 
 const headers = ["Step", "Admin", "Checker", "Operator", "App", "Inventory View"];
 

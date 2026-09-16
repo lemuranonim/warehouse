@@ -50,4 +50,5 @@ export type InventoryImportPreview = {
   sheets: InventorySheetSummary[];
   inventoryPreview: InventoryImportRow[];
   notices: string[];
+  stagedBatches?: Array<{ id: string; sheet: string; rows: number }>;
 };

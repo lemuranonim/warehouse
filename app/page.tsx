@@ -16,24 +16,35 @@ import { ProcessMap } from "@/components/process-map";
 import { StatusBadge } from "@/components/status-badge";
 import { WorkflowBoard } from "@/components/workflow-board";
 import {
-  currentStock,
-  dashboardMetrics,
-  stockMovements,
   workflowSteps
 } from "@/lib/demo-data";
 import { formatKg, formatNumber } from "@/lib/format";
+import { requirePageAccess } from "@/lib/auth";
+import { getDashboardData } from "@/lib/supabase/queries";
 
-export default function DashboardPage() {
-  const metrics = dashboardMetrics();
-  const stock = currentStock();
+export default async function DashboardPage() {
+  await requirePageAccess();
+  const dashboard = await getDashboardData();
+  const { metrics, currentStock: stock, movements: stockMovements } = dashboard;
 
   return (
     <div className="page">
       <PageHeader
+        actions={
+          <span className={`status ${dashboard.source === "live" ? "green" : dashboard.source === "demo" ? "amber" : "rose"}`}>
+            {dashboard.source === "live" ? "LIVE DATA" : dashboard.source === "demo" ? "DEMO DATA" : "DATA OFFLINE"}
+          </span>
+        }
         eyebrow="Inventory Overview"
         title="Inventory Control Tower"
         description="Monitor stok tersedia, status LPN, dan progress operasional gudang PT Advanta Seeds Indonesia secara real-time."
       />
+
+      {dashboard.source !== "live" ? (
+        <div className={`inventory-message ${dashboard.source === "error" ? "error" : "warning"}`} role="status">
+          {dashboard.errorMessage ?? "Mode demo aktif. Angka berikut bukan saldo operasional dan tidak boleh digunakan untuk keputusan warehouse."}
+        </div>
+      ) : null}
 
       {/* KPI Cards */}
       <section className="grid grid-4">
@@ -126,7 +137,7 @@ export default function DashboardPage() {
             padding: "4px 10px", borderRadius: 6,
             border: "1px solid var(--green-mid)"
           }}>
-            <TrendingUp size={11} /> Semua step aktif
+            <TrendingUp size={11} /> Blueprint workflow
           </span>
         </div>
         <WorkflowBoard steps={workflowSteps} />
@@ -204,7 +215,7 @@ export default function DashboardPage() {
               },
               { key: "status", header: "Status", render: (row) => <StatusBadge value={row.statusAfter} /> }
             ]}
-            rows={stockMovements.slice(-6).reverse()}
+            rows={dashboard.source === "live" ? stockMovements.slice(0, 6) : stockMovements.slice(-6).reverse()}
           />
         </div>
       </section>

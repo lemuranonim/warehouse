@@ -1,139 +1,35 @@
-"use client";
-import { useState } from "react";
-import { ClipboardCheck, Database, Plus } from "lucide-react";
+import { Database } from "lucide-react";
+import { openCycleCountAction, requestAdjustmentAction, reviewCycleCountAction, submitCycleCountAction } from "@/app/actions/wms";
 import { DataTable } from "@/components/data-table";
 import { PageHeader } from "@/components/page-header";
-import { ScannerConsole } from "@/components/scanner-console";
 import { StatusBadge } from "@/components/status-badge";
-import { cycleCountSessions } from "@/lib/demo-data";
-import { formatKg, formatStatusLabel } from "@/lib/format";
+import { WmsActionForm } from "@/components/wms-action-form";
+import { formatKg } from "@/lib/format";
+import { getCycleAndAdjustmentData } from "@/lib/wms-queries";
+import { getCurrentWmsAccess } from "@/lib/auth";
 
-export default function CycleCountPage() {
-  const [selectedId, setSelectedId] = useState(cycleCountSessions[1].sessionId);
-  const session = cycleCountSessions.find((s) => s.sessionId === selectedId) ?? cycleCountSessions[0];
-
-  const totalLines = session.lines.length;
-  const counted = session.lines.filter((l) => l.status !== "pending").length;
-  const pending = session.lines.filter((l) => l.status === "pending").length;
-  const variance = session.lines.filter((l) => l.variance !== null && l.variance !== 0).length;
-
-  return (
-    <div className="page">
-      <PageHeader
-        actions={
-          <>
-            <button className="secondary-button" type="button">Tutup Sesi</button>
-            <button className="primary-button" type="button"><Plus size={16} /> Buka Sesi Baru</button>
-          </>
-        }
-        description="Buka sesi count, scan lokasi, input qty aktual, dan submit selisih untuk persetujuan supervisor."
-        eyebrow="Cycle counts"
-        icon={Database}
-        title="Cycle Count & Verifikasi Stok"
-      />
-
-      {/* Session Tabs */}
-      <section className="section">
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-          {cycleCountSessions.map((s) => (
-            <button
-              key={s.sessionId}
-              type="button"
-              onClick={() => setSelectedId(s.sessionId)}
-              style={{
-                padding: "8px 16px", borderRadius: 8, border: "1px solid var(--line)",
-                background: selectedId === s.sessionId ? "var(--navy)" : "var(--surface)",
-                color: selectedId === s.sessionId ? "#fff" : "var(--ink)",
-                fontWeight: 600, fontSize: "0.82rem", cursor: "pointer"
-              }}
-            >
-              {s.sessionId} &mdash; <span style={{ opacity: 0.7 }}>{formatStatusLabel(s.status)}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Session Info */}
-        <div style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 12, padding: 16, display: "flex", gap: 24, flexWrap: "wrap" }}>
-          <div><span style={{ fontSize: "0.72rem", color: "var(--muted)" }}>Session ID</span><br /><strong style={{ fontFamily: "monospace", color: "var(--navy)" }}>{session.sessionId}</strong></div>
-          <div><span style={{ fontSize: "0.72rem", color: "var(--muted)" }}>Dibuka</span><br /><strong>{session.openDate}</strong></div>
-          <div><span style={{ fontSize: "0.72rem", color: "var(--muted)" }}>Status</span><br /><StatusBadge value={session.status} /></div>
-          <div><span style={{ fontSize: "0.72rem", color: "var(--muted)" }}>Scope</span><br /><strong style={{ fontFamily: "monospace" }}>{session.scope}</strong></div>
-          <div><span style={{ fontSize: "0.72rem", color: "var(--muted)" }}>Dibuka Oleh</span><br /><strong>{session.openedBy}</strong></div>
-        </div>
-      </section>
-
-      {/* Summary */}
-      <section className="section">
-        <div style={{ display: "flex", gap: 12 }}>
-          {[
-            { label: "Total Lines", value: totalLines, color: "var(--navy)" },
-            { label: "Dihitung", value: counted, color: "var(--green)" },
-            { label: "Belum Dihitung", value: pending, color: "#d97706" },
-            { label: "Ada Selisih", value: variance, color: "#e53e3e" },
-          ].map((s) => (
-            <div key={s.label} style={{ flex: 1, background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 10, padding: "14px 16px", textAlign: "center" }}>
-              <div style={{ fontSize: "1.6rem", fontWeight: 800, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: 2 }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* MAIN: System vs Actual Table */}
-      <section className="section">
-        <div className="section-header">
-          <div>
-            <div className="section-title">Perbandingan Sistem vs Aktual</div>
-            <div className="section-subtitle">Input qty aktual per LPN di setiap lokasi</div>
-          </div>
-        </div>
-        <DataTable
-          columns={[
-            { key: "loc", header: "Lokasi", render: (r) => <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--navy)" }}>{r.locationCode}</span> },
-            { key: "lpn", header: "LPN", render: (r) => <span style={{ fontFamily: "monospace", fontSize: "0.8rem", color: "var(--navy)" }}>{r.lpnCode}</span> },
-            { key: "mat", header: "Material", render: (r) => <span style={{ fontSize: "0.82rem" }}>{r.materialDescription}</span> },
-            { key: "lot", header: "Lot", render: (r) => <span style={{ fontFamily: "monospace", fontSize: "0.8rem", color: "#d97706" }}>{r.lotNumber}</span> },
-            { key: "book", header: "Qty Sistem (KG)", render: (r) => <span style={{ fontWeight: 700, color: "#2563eb" }}>{formatKg(r.bookQtyKg)}</span> },
-            { key: "actual", header: "Qty Aktual (KG)", render: (r) => r.countedQtyKg !== null
-              ? <span style={{ fontWeight: 700, color: "var(--green)" }}>{formatKg(r.countedQtyKg)}</span>
-              : <span className="status amber" style={{ fontSize: "0.72rem" }}>Belum Dihitung</span>
-            },
-            { key: "variance", header: "Selisih (KG)", render: (r) => {
-              if (r.variance === null) return <span style={{ color: "var(--muted)" }}>—</span>;
-              const v = r.variance;
-              return <span style={{ fontWeight: 700, color: v === 0 ? "var(--green)" : v < 0 ? "#e53e3e" : "#d97706" }}>{v === 0 ? "\u2713 0" : formatKg(v)}</span>;
-            }},
-            { key: "status", header: "Status", render: (r) => <StatusBadge value={r.status} /> },
-            { key: "action", header: "", render: (r) => r.status === "pending"
-              ? <button className="primary-button" type="button" style={{ fontSize: "0.75rem", padding: "5px 12px" }}>Input Qty</button>
-              : null
-            },
-          ]}
-          rows={session.lines}
-        />
-      </section>
-
-      <section className="section">
-        <ScannerConsole />
-      </section>
-
-      {/* Session History */}
-      <section className="section">
-        <div className="section-header">
-          <div className="section-title">Riwayat Sesi Count</div>
-        </div>
-        <DataTable
-          columns={[
-            { key: "id", header: "Session ID", render: (r) => <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--navy)" }}>{r.sessionId}</span> },
-            { key: "open", header: "Dibuka", render: (r) => r.openDate },
-            { key: "close", header: "Ditutup", render: (r) => r.closeDate ?? <span style={{ color: "var(--muted)" }}>—</span> },
-            { key: "scope", header: "Scope", render: (r) => <span style={{ fontFamily: "monospace", fontSize: "0.8rem" }}>{r.scope}</span> },
-            { key: "lines", header: "Lines", render: (r) => r.lines.length },
-            { key: "status", header: "Status", render: (r) => <StatusBadge value={r.status} /> },
-          ]}
-          rows={cycleCountSessions}
-        />
-      </section>
-    </div>
-  );
+export default async function CycleCountPage() {
+  const [{ sessions, lines, lpns, materials, locations }, access] = await Promise.all([getCycleAndAdjustmentData(), getCurrentWmsAccess()]);
+  const canManage = access?.roles.some(role => role === "Admin" || role === "Supervisor") ?? false;
+  const locationById = new Map(locations.map(location => [location.id, location])); const lpnById = new Map(lpns.map(lpn => [lpn.id, lpn])); const materialById = new Map(materials.map(material => [material.id, material]));
+  const rows = lines.map(line => { const lpn = line.lpn_id ? lpnById.get(line.lpn_id) : undefined; return { ...line, lpn, material: lpn ? materialById.get(lpn.material_id) : undefined, location: line.location_id ? locationById.get(line.location_id) : undefined }; });
+  return <div className="page">
+    <PageHeader eyebrow="Cycle count · live" icon={Database} title="Cycle Count & Rekonsiliasi" description="Snapshot saldo per lokasi, input aktual, lalu supervisor menyetujui adjustment ledger." />
+    <section className="grid grid-3">
+      {canManage ? <div><div className="section-header"><h2 className="section-title">Buka sesi</h2></div><WmsActionForm action={openCycleCountAction} submitLabel="Buka Cycle Count"><label className="wms-field"><span>Lokasi *</span><select name="location_id" required><option value="">Pilih</option>{locations.filter(l => l.is_active).map(l => <option key={l.id} value={l.id}>{l.location_code} · {l.warehouse}</option>)}</select></label></WmsActionForm></div> : null}
+      <div><div className="section-header"><h2 className="section-title">Input aktual</h2></div><WmsActionForm action={submitCycleCountAction} submitLabel="Simpan Hitungan"><label className="wms-field"><span>Line *</span><select name="cycle_count_line_id" required><option value="">Pilih</option>{rows.filter(l => !l.is_counted).map(l => <option key={l.id} value={l.id}>{l.location?.location_code} · {l.lpn?.lpn_code} · buku {formatKg(l.expected_qty_kg)}</option>)}</select></label><label className="wms-field"><span>Qty Aktual *</span><input min="0" name="actual_qty_kg" required step="0.001" type="number" /></label></WmsActionForm></div>
+      {canManage ? <div><div className="section-header"><h2 className="section-title">Review sesi</h2></div><WmsActionForm action={reviewCycleCountAction} submitLabel="Proses Review"><label className="wms-field"><span>Sesi Counted *</span><select name="cycle_count_session_id" required><option value="">Pilih</option>{sessions.filter(s => s.status === "counted").map(s => <option key={s.id} value={s.id}>{s.id.slice(0,8)} · {locationById.get(s.scope_location_id ?? "")?.location_code}</option>)}</select></label><label className="wms-field"><span>Keputusan</span><select name="decision"><option value="approve">Approve</option><option value="reject">Reject</option></select></label></WmsActionForm></div> : null}
+    </section>
+    <section className="section"><div className="section-header"><div><h2 className="section-title">Ajukan koreksi di luar sesi</h2><p className="section-subtitle">Memerlukan approval Supervisor dan tidak langsung mengubah saldo.</p></div></div><WmsActionForm action={requestAdjustmentAction} submitLabel="Ajukan Adjustment"><label className="wms-field"><span>Token LPN *</span><input name="lpn_token" required /></label><label className="wms-field"><span>Saldo target KG *</span><input min="0" name="target_qty_kg" required step="0.001" type="number" /></label><label className="wms-field"><span>Reason *</span><select name="reason_code"><option>COUNT_VARIANCE</option><option>DAMAGE</option><option>QUALITY_HOLD</option><option>DATA_CORRECTION</option></select></label><label className="wms-field wide"><span>Catatan</span><input name="note" /></label></WmsActionForm></section>
+    <section className="section"><DataTable columns={[
+      { key: "session", header: "Session", render: row => row.session_id.slice(0,8) },
+      { key: "location", header: "Location", render: row => row.location?.location_code ?? "-" },
+      { key: "lpn", header: "LPN", render: row => <span className="mono-strong">{row.lpn?.lpn_code ?? "-"}</span> },
+      { key: "material", header: "Material", render: row => row.material?.long_description ?? "-" },
+      { key: "book", header: "Book KG", render: row => formatKg(row.expected_qty_kg) },
+      { key: "actual", header: "Actual KG", render: row => row.is_counted ? formatKg(row.actual_qty_kg) : "Belum" },
+      { key: "variance", header: "Variance", render: row => row.is_counted ? formatKg(row.variance_qty_kg) : "-" },
+      { key: "status", header: "Status", render: row => <StatusBadge value={row.is_counted ? row.status : "pending"} /> },
+    ]} rows={rows} emptyMessage="Belum ada sesi cycle count." /></section>
+  </div>;
 }

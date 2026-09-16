@@ -1,71 +1,33 @@
 import Link from "next/link";
-import { FileCheck, FileDown, Send } from "lucide-react";
+import { FileCheck } from "lucide-react";
+import { createDeliveryNoteAction, dispatchOutboundAction } from "@/app/actions/wms";
 import { DataTable } from "@/components/data-table";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
-import { deliveryNotes, scanScenarios, workflowSteps } from "@/lib/demo-data";
-import { formatKg } from "@/lib/format";
+import { WmsActionForm } from "@/components/wms-action-form";
+import { getOutboundData } from "@/lib/wms-queries";
 
-export default function ShippingPage() {
-  const rows = workflowSteps.filter((step) => ["Staging", "Dispatch"].includes(step.workflow));
-  return (
-    <div className="page">
-      <PageHeader
-        actions={
-          <button className="primary-button" type="button">
-            <Send aria-hidden size={18} /> Confirm Dispatch
-          </button>
-        }
-        eyebrow="Dispatch"
-        icon={FileCheck}
-        title="Validate load and close dispatch."
-        description="Scan the delivery note and assigned LPNs before stock is issued from the warehouse."
-      />
-      <section className="section">
-        <div className="section-header">
-          <div>
-            <div className="section-title">Antrian Delivery Note</div>
-            <div className="section-subtitle">Cocokkan seluruh lot dan kuantitas terhadap dokumen sebelum konfirmasi dispatch.</div>
-          </div>
-        </div>
-        <DataTable
-          columns={[
-            { key: "dn", header: "DN No", render: (row) => <span style={{ fontFamily: "monospace", fontWeight: 700 }}>{row.dnNo}</span> },
-            { key: "date", header: "Tanggal", render: (row) => row.dnDate },
-            { key: "destination", header: "Tujuan", render: (row) => row.destination },
-            { key: "vehicle", header: "Kendaraan", render: (row) => row.vehicle },
-            { key: "lines", header: "Lot", render: (row) => row.lines.length },
-            { key: "qty", header: "Qty", render: (row) => <strong>{formatKg(row.totalQtyKg)} KG</strong> },
-            { key: "status", header: "Status", render: (row) => <StatusBadge value={row.status} /> },
-            { key: "action", header: "", render: (row) => (
-              <Link className="secondary-button compact-button" href={`/documents/delivery/${row.dnNo}`}>
-                <FileDown aria-hidden size={14} /> Preview
-              </Link>
-            ) },
-          ]}
-          rows={deliveryNotes}
-        />
-      </section>
-      <section className="grid grid-2">
-        <DataTable
-          columns={[
-            { key: "step", header: "Seq", render: (row) => row.step },
-            { key: "workflow", header: "Stage", render: (row) => row.workflow },
-            { key: "activity", header: "Activity", render: (row) => row.activity },
-            { key: "after", header: "Target Status", render: (row) => <StatusBadge value={row.statusAfter} /> }
-          ]}
-          rows={rows}
-        />
-        <DataTable
-          columns={[
-            { key: "scenario", header: "Task", render: (row) => row.scenario },
-            { key: "scan", header: "First Scan", render: (row) => row.firstScan },
-            { key: "input", header: "Next Step", render: (row) => row.nextInput },
-            { key: "result", header: "Result", render: (row) => row.result }
-          ]}
-          rows={scanScenarios.filter((scenario) => ["Dispatch Confirmation"].includes(scenario.scenario))}
-        />
-      </section>
-    </div>
-  );
+export default async function ShippingPage() {
+  const { documents, notes, tasks, items } = await getOutboundData();
+  const stagedDocs = documents.filter(doc => doc.status === "staged"); const dispatchable = documents.filter(doc => doc.status === "dn_created");
+  return <div className="page">
+    <PageHeader eyebrow="Dispatch · live" icon={FileCheck} title="Delivery Note & Dispatch" description="Buat DN setelah seluruh task staged, lalu dispatch atomik untuk mengurangi saldo dan menutup pengiriman." />
+    <section className="grid grid-2">
+      <div><div className="section-header"><h2 className="section-title">Buat Delivery Note</h2></div><WmsActionForm action={createDeliveryNoteAction} submitLabel="Buat DN">
+        <label className="wms-field wide"><span>Staged Order *</span><select name="outbound_document_id" required><option value="">Pilih order</option>{stagedDocs.map(doc => <option key={doc.id} value={doc.id}>{doc.doc_no} · {doc.destination ?? "-"}</option>)}</select></label>
+        <label className="wms-field"><span>DN No *</span><input name="delivery_note_no" required /></label>
+      </WmsActionForm></div>
+      <div><div className="section-header"><h2 className="section-title">Konfirmasi Dispatch</h2></div><WmsActionForm action={dispatchOutboundAction} submitLabel="Confirm Dispatch">
+        <label className="wms-field wide"><span>Order dengan DN *</span><select name="outbound_document_id" required><option value="">Pilih order</option>{dispatchable.map(doc => <option key={doc.id} value={doc.id}>{doc.doc_no} · {notes.find(note => note.outbound_doc_id === doc.id)?.dn_no}</option>)}</select></label>
+      </WmsActionForm></div>
+    </section>
+    <section className="section"><DataTable columns={[
+      { key: "dn", header: "DN", render: row => <Link className="mono-strong" href={`/documents/delivery/${encodeURIComponent(row.dn_no)}`}>{row.dn_no}</Link> },
+      { key: "order", header: "Outbound", render: row => documents.find(doc => doc.id === row.outbound_doc_id)?.doc_no ?? "-" },
+      { key: "destination", header: "Destination", render: row => row.destination ?? "-" },
+      { key: "status", header: "Status", render: row => <StatusBadge value={row.status} /> },
+      { key: "shipped", header: "Shipped At", render: row => row.shipped_at ? new Date(row.shipped_at).toLocaleString("id-ID") : "-" },
+    ]} rows={notes} emptyMessage="Belum ada delivery note." /></section>
+    <div className="inventory-message warning">Dispatch hanya dapat diposting bila seluruh {tasks.length} task aktif untuk order sudah staged. Saat ini terdapat {items.length} line outbound.</div>
+  </div>;
 }

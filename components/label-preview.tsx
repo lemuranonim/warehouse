@@ -1,19 +1,10 @@
 import { QrCode } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
-const label = {
-  lpn: "LPN-20260520-000020",
-  sku: "152000198",
-  lot: "NPCCA0090",
-  qty: "1,000.000 KG",
-  inventoryType: "Fresh Seed",
-  inboundRef: "IN-04251112",
-  status: "Available",
-  token: "A7K9Q2"
-};
+export type LabelData = { lpn: string; sku: string; lot: string; qty: string; inventoryType: string; inboundRef: string; status: string; token: string };
 
-export function LabelPreview() {
-  const scanBaseUrl = (process.env.NEXT_PUBLIC_WMS_BASE_URL ?? "https://wms.domainmu.com").replace(/\/$/, "");
+export function LabelPreview({ label }: { label: LabelData }) {
+  const scanBaseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
   const scanUrl = `${scanBaseUrl}/s/${label.token}`;
 
   return (

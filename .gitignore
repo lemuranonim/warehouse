@@ -7,4 +7,16 @@ dist
 .env.*.local
 *.log
 coverage
+*.tsbuildinfo
 .vercel
+.npm-cache
+.npm-audit-cache
+supabase/.temp/
+
+# Local proposal/QA artifacts are not application source.
+~$*.docx
+qa_*/
+quotation_assets/
+/Final Quotation Proposal Warehouse Digitalization Advanta*.docx
+/build_enhanced_workflow.js
+/build_final_quotation.py

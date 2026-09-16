@@ -13,7 +13,7 @@ export function InventoryImportConsole() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function analyzeWorkbook() {
+  async function analyzeWorkbook(mode: "preview" | "stage" = "preview") {
     if (!file) {
       setError("Pilih workbook .xlsx terlebih dahulu.");
       return;
@@ -25,6 +25,7 @@ export function InventoryImportConsole() {
     try {
       const body = new FormData();
       body.append("file", file);
+      body.append("mode", mode);
       const response = await fetch("/api/inventory/import", { method: "POST", body });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "Workbook tidak dapat dibaca.");
@@ -66,7 +67,7 @@ export function InventoryImportConsole() {
             }}
             type="file"
           />
-          <button className="primary-button" disabled={loading || !file} onClick={analyzeWorkbook} type="button">
+          <button className="primary-button" disabled={loading || !file} onClick={() => analyzeWorkbook("preview")} type="button">
             {loading ? <LoaderCircle className="spin" aria-hidden size={16} /> : <Upload aria-hidden size={16} />}
             {loading ? "Membaca workbook..." : "Baca & Validasi"}
           </button>
@@ -85,6 +86,20 @@ export function InventoryImportConsole() {
             <CheckCircle2 aria-hidden size={18} />
             <span><strong>{preview.fileName}</strong> berhasil dibaca. Hasil berikut masih berupa staging dan belum mengubah stok WMS.</span>
           </div>
+
+          {process.env.NEXT_PUBLIC_WMS_DATA_MODE === "live" && !preview.stagedBatches?.length ? (
+            <section className="section">
+              <div className="section-header"><div><h2 className="section-title">Simpan ke staging</h2><p className="section-subtitle">Belum mengubah saldo. Setiap sheet disimpan atomik dan file yang sama tidak akan menggandakan batch.</p></div></div>
+              <button className="primary-button" disabled={loading || preview.totals.blockedRows > 0} onClick={() => analyzeWorkbook("stage")} type="button">
+                {loading ? <LoaderCircle className="spin" aria-hidden size={16} /> : <Upload aria-hidden size={16} />}
+                {preview.totals.blockedRows > 0 ? "Perbaiki baris blocked" : "Stage ke Database"}
+              </button>
+            </section>
+          ) : null}
+
+          {preview.stagedBatches?.length ? (
+            <div className="inventory-message success"><CheckCircle2 aria-hidden size={18} /> {preview.stagedBatches.length} batch diproses: Product List masuk ke item master, snapshot inventory siap direview untuk posting ledger.</div>
+          ) : null}
 
           <section className="grid grid-4">
             {[

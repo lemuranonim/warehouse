@@ -6,7 +6,7 @@ type PageProps = { params: Promise<{ docNo: string }> };
 
 export default async function IncomingDocumentPage({ params }: PageProps) {
   const { docNo } = await params;
-  const document = getWarehouseReport("incoming", decodeURIComponent(docNo));
+  const document = await getWarehouseReport("incoming", decodeURIComponent(docNo));
   if (!document) notFound();
   return <WarehouseDocumentPreview document={document} />;
 }

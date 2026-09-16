@@ -1,6 +1,11 @@
 import { Database } from "lucide-react";
 import { InventoryImportConsole } from "@/components/inventory-import-console";
 import { PageHeader } from "@/components/page-header";
+import { DataTable } from "@/components/data-table";
+import { StatusBadge } from "@/components/status-badge";
+import { WmsActionForm } from "@/components/wms-action-form";
+import { postInventoryBatchAction } from "@/app/actions/wms";
+import { getInventoryWorkspaceData } from "@/lib/wms-queries";
 
 const fieldMappings = [
   ["Date", "stock_date", "Tanggal snapshot"],
@@ -15,7 +20,8 @@ const fieldMappings = [
   ["Note · Action · Remark", "note · remark", "Catatan tindak lanjut"],
 ];
 
-export default function InventoryDatabasePage() {
+export default async function InventoryDatabasePage() {
+  const { batches } = await getInventoryWorkspaceData();
   return (
     <div className="page">
       <PageHeader
@@ -26,6 +32,22 @@ export default function InventoryDatabasePage() {
       />
 
       <InventoryImportConsole />
+
+      <section className="section">
+        <div className="section-header"><div><h2 className="section-title">Posting batch tervalidasi</h2><p className="section-subtitle">Tindakan ini membuat material, lot, LPN, token scan, dan movement inbound pada ledger.</p></div></div>
+        <WmsActionForm action={postInventoryBatchAction} submitLabel="Post ke Ledger">
+          <label className="wms-field wide"><span>Batch *</span><select name="inventory_batch_id" required><option value="">Pilih batch</option>{batches.filter(batch => ["uploaded", "validated"].includes(batch.status)).map(batch => <option key={batch.id} value={batch.id}>{batch.source_file} · {batch.source_sheet} · {batch.row_count} baris</option>)}</select></label>
+        </WmsActionForm>
+        <div className="inventory-message warning">Pastikan warehouse dan minimal satu lokasi receiving/storage untuk setiap nama warehouse pada workbook sudah dibuat sebelum posting.</div>
+        <DataTable columns={[
+          { key: "file", header: "File", render: row => row.source_file },
+          { key: "sheet", header: "Sheet", render: row => row.source_sheet },
+          { key: "warehouse", header: "Warehouse", render: row => row.warehouse ?? "-" },
+          { key: "rows", header: "Rows", render: row => row.row_count },
+          { key: "status", header: "Status", render: row => <StatusBadge value={row.status} /> },
+          { key: "date", header: "Created", render: row => new Date(row.created_at).toLocaleString("id-ID") },
+        ]} rows={batches} emptyMessage="Belum ada batch staging." />
+      </section>
 
       <section className="section">
         <div className="section-header">

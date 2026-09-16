@@ -1,95 +1,34 @@
-import { Shield, UserCog, Users } from "lucide-react";
+import { Users } from "lucide-react";
+import { setUserAccessAction } from "@/app/actions/wms";
 import { DataTable } from "@/components/data-table";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
-import { userProfiles } from "@/lib/demo-data";
+import { WmsActionForm } from "@/components/wms-action-form";
+import { getUserAccessData } from "@/lib/wms-queries";
 
-function RoleBadge({ role }: { role: string }) {
-  const toneMap: Record<string, string> = {
-    Admin: "violet",
-    Operator: "blue",
-    Checker: "green",
-    Supervisor: "amber",
-    Viewer: "violet",
-  };
-  const tone = toneMap[role] ?? "violet";
-  return <span className={`status ${tone}`}>{role}</span>;
-}
-
-export default function UsersPage() {
-  const total = userProfiles.length;
-  const active = userProfiles.filter((u) => u.status === "active").length;
-  const roles = ["Admin", "Operator", "Checker", "Supervisor", "Viewer"];
-
-  return (
-    <div className="page">
-      <PageHeader
-        actions={
-          <>
-            <button className="secondary-button" type="button">
-              Export
-            </button>
-            <button className="primary-button" type="button">
-              <UserCog size={16} /> Tambah User
-            </button>
-          </>
-        }
-        description="Kelola akses pengguna, role, dan cakupan gudang berbasis RBAC."
-        eyebrow="User management"
-        icon={Users}
-        title="User & Role Management"
-      />
-
-      {/* Summary strip */}
-      <section className="section">
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          {[
-            { label: "Total User", value: total, color: "var(--navy)" },
-            { label: "Aktif", value: active, color: "var(--green)" },
-            { label: "Tidak Aktif", value: total - active, color: "#e53e3e" },
-            ...roles.map((r) => ({
-              label: r,
-              value: userProfiles.filter((u) => u.role === r).length,
-              color: "var(--navy-2)",
-            })),
-          ].map((item) => (
-            <div
-              key={item.label}
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--line)",
-                borderRadius: 10,
-                padding: "12px 20px",
-                minWidth: 110,
-                textAlign: "center",
-              }}
-            >
-              <div style={{ fontSize: "1.5rem", fontWeight: 800, color: item.color }}>
-                {item.value}
-              </div>
-              <div style={{ fontSize: "0.72rem", color: "var(--muted)", marginTop: 2 }}>
-                {item.label}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="section">
-        <DataTable
-          columns={[
-            { key: "id", header: "ID", render: (row) => <span style={{ fontFamily: "monospace", fontSize: "0.8rem", color: "var(--navy)" }}>{row.id}</span> },
-            { key: "name", header: "Nama", render: (row) => <strong>{row.name}</strong> },
-            { key: "email", header: "Email", render: (row) => <span style={{ fontSize: "0.82rem", color: "var(--muted)" }}>{row.email}</span> },
-            { key: "role", header: "Role", render: (row) => <RoleBadge role={row.role} /> },
-            { key: "warehouse", header: "Warehouse", render: (row) => row.warehouse },
-            { key: "status", header: "Status", render: (row) => <StatusBadge value={row.status} /> },
-            { key: "lastLogin", header: "Last Login", render: (row) => <span style={{ fontSize: "0.8rem", color: "var(--muted)" }}>{row.lastLogin}</span> },
-            { key: "action", header: "", render: () => <button className="icon-button" type="button"><Shield size={14} /></button> },
-          ]}
-          rows={userProfiles}
-        />
-      </section>
-    </div>
-  );
+export default async function UsersPage() {
+  const { profiles, roles, assignments, warehouses } = await getUserAccessData();
+  const roleById = new Map(roles.map(role => [role.id, role.name]));
+  const userRoles = new Map<string, string[]>();
+  for (const assignment of assignments) userRoles.set(assignment.user_id, [...(userRoles.get(assignment.user_id) ?? []), roleById.get(assignment.role_id) ?? "-"]);
+  const rows = profiles.map(profile => ({ ...profile, roles: userRoles.get(profile.id) ?? [] }));
+  return <div className="page">
+    <PageHeader eyebrow="RBAC · live" icon={Users} title="User & Role Management" description="Aktifkan akun Auth yang sudah terdaftar, berikan role, dan batasi cakupan warehouse." />
+    <section className="section"><WmsActionForm action={setUserAccessAction} submitLabel="Simpan Akses">
+      <label className="wms-field"><span>Email akun Supabase *</span><input name="user_email" required type="email" /></label>
+      <label className="wms-field"><span>Nama lengkap *</span><input name="profile_name" required /></label>
+      <label className="wms-field"><span>Role *</span><select name="role_name" required>{roles.map(role => <option key={role.id}>{role.name}</option>)}</select></label>
+      <label className="wms-field"><span>Default warehouse</span><select name="default_warehouse"><option value="">Tidak dibatasi</option>{warehouses.map(w => <option key={w.id} value={w.warehouse_code}>{w.warehouse_code}</option>)}</select></label>
+      <label className="wms-field wide"><span>Scope warehouse (pisahkan koma, atau All)</span><input defaultValue="All" name="warehouse_codes" /></label>
+    </WmsActionForm></section>
+    <div className="inventory-message warning">Akun harus dibuat lebih dulu di Supabase Auth. Menambah role di sini tidak menghapus role lain yang sudah aktif.</div>
+    <section className="section"><DataTable columns={[
+      { key: "name", header: "Nama", render: row => <strong>{row.full_name ?? "-"}</strong> },
+      { key: "email", header: "Email", render: row => row.email ?? "-" },
+      { key: "roles", header: "Role", render: row => row.roles.join(", ") || "-" },
+      { key: "warehouse", header: "Default", render: row => row.default_warehouse ?? "All" },
+      { key: "scope", header: "Scope", render: row => row.warehouse_scope.join(", ") || "-" },
+      { key: "status", header: "Status", render: row => <StatusBadge value={row.is_active ? "active" : "inactive"} /> },
+    ]} rows={rows} /></section>
+  </div>;
 }

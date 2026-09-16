@@ -1,5 +1,4 @@
 import type { LucideIcon } from "lucide-react";
-import { ArrowRight } from "lucide-react";
 
 type PageHeaderProps = {
   eyebrow: string;

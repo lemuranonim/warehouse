@@ -1,20 +1,17 @@
-import { MapPinned, PackageCheck } from "lucide-react";
+import { PackageCheck } from "lucide-react";
 import { DataTable } from "@/components/data-table";
 import { PageHeader } from "@/components/page-header";
 import { ScannerConsole } from "@/components/scanner-console";
 import { StatusBadge } from "@/components/status-badge";
-import { workflowSteps } from "@/lib/demo-data";
+import { getInventoryWorkspaceData } from "@/lib/wms-queries";
+import { formatKg } from "@/lib/format";
 
-export default function PutawayPage() {
-  const rows = workflowSteps.filter((step) => step.workflow === "Putaway");
+export default async function PutawayPage() {
+  const { inventory } = await getInventoryWorkspaceData();
+  const rows = inventory.filter(row => ["label_printed", "received"].includes(row.status));
   return (
     <div className="page">
       <PageHeader
-        actions={
-          <button className="secondary-button" type="button">
-            <MapPinned aria-hidden size={18} /> Check Location
-          </button>
-        }
         eyebrow="Putaway"
         icon={PackageCheck}
         title="Confirm LPN into storage location."
@@ -26,13 +23,14 @@ export default function PutawayPage() {
       <section className="section">
         <DataTable
           columns={[
-            { key: "activity", header: "Task", render: (row) => row.activity },
-            { key: "scan", header: "Scan", render: (row) => row.scanRequired },
-            { key: "action", header: "Result", render: (row) => row.output },
-            { key: "before", header: "From Status", render: (row) => <StatusBadge value={row.statusBefore} /> },
-            { key: "after", header: "To Status", render: (row) => <StatusBadge value={row.statusAfter} /> }
+            { key: "lpn", header: "LPN", render: (row) => <span className="mono-strong">{row.lpn_code}</span> },
+            { key: "material", header: "Material", render: (row) => row.material_description },
+            { key: "lot", header: "Lot", render: (row) => row.lot_number },
+            { key: "qty", header: "Qty", render: (row) => `${formatKg(row.qty_current_kg)} KG` },
+            { key: "status", header: "Status", render: (row) => <StatusBadge value={row.status} /> }
           ]}
           rows={rows}
+          emptyMessage="Tidak ada LPN menunggu putaway."
         />
       </section>
     </div>

@@ -1,16 +1,19 @@
 import Image from "next/image";
-import { LogIn, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import { LoginForm } from "@/components/login-form";
+import { safeInternalPath } from "@/lib/safe-navigation";
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ next?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const requestedNext = (await searchParams).next;
+  const nextPath = safeInternalPath(requestedNext);
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      overflow: "hidden"
-    }}>
+    <div className="login-layout">
       {/* Left panel — brand */}
-      <div style={{
+      <div className="login-brand-panel" style={{
         background: "linear-gradient(160deg, #1a3272 0%, #22408c 60%, #1a3272 100%)",
         display: "flex",
         flexDirection: "column",
@@ -56,6 +59,7 @@ export default function LoginPage() {
               alt="WH Warehouse Logo"
               width={140}
               height={140}
+              priority
               style={{ objectFit: "cover", width: "100%", height: "100%" }}
             />
           </div>
@@ -113,7 +117,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right panel — form */}
-      <div style={{
+      <div className="login-form-panel" style={{
         background: "#f2f5fb",
         display: "flex",
         flexDirection: "column",
@@ -157,51 +161,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Form */}
-          <form>
-            <div style={{ marginBottom: 16 }}>
-              <label style={{
-                display: "block", fontSize: "0.68rem", fontWeight: 700,
-                color: "#7a8fae", letterSpacing: "0.07em",
-                textTransform: "uppercase", marginBottom: 7
-              }} htmlFor="email">
-                Email / Username
-              </label>
-              <input
-                className="scan-input"
-                id="email"
-                placeholder="user@advantaseeds.co.id"
-                style={{ width: "100%" }}
-                type="email"
-              />
-            </div>
-
-            <div style={{ marginBottom: 28 }}>
-              <label style={{
-                display: "block", fontSize: "0.68rem", fontWeight: 700,
-                color: "#7a8fae", letterSpacing: "0.07em",
-                textTransform: "uppercase", marginBottom: 7
-              }} htmlFor="password">
-                Password
-              </label>
-              <input
-                className="scan-input"
-                id="password"
-                placeholder="Masukkan password"
-                style={{ width: "100%" }}
-                type="password"
-              />
-            </div>
-
-            <button
-              className="primary-button"
-              type="button"
-              style={{ width: "100%", height: 46, fontSize: "0.88rem" }}
-            >
-              <LogIn aria-hidden size={16} />
-              Masuk ke WMS
-            </button>
-          </form>
+          <LoginForm nextPath={nextPath} />
 
           <div style={{
             marginTop: 24, paddingTop: 20,
@@ -231,7 +191,7 @@ export default function LoginPage() {
             />
             <div style={{ textAlign: "left" }}>
               <p style={{ fontSize: "0.68rem", fontWeight: 700, color: "#b3c0d4" }}>
-                WMS v2.5.0
+                WMS v1.0.0 · Production Candidate
               </p>
               <p style={{ fontSize: "0.62rem", color: "#b3c0d4" }}>
                 PT Advanta Seeds Indonesia

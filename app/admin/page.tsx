@@ -4,8 +4,14 @@ import { MetricCard } from "@/components/metric-card";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { modules, rolesAccess, rpcEndpoints } from "@/lib/demo-data";
+import { ADMIN_ROLES } from "@/lib/access-control";
+import { requirePageAccess } from "@/lib/auth";
+import { getDashboardData } from "@/lib/supabase/queries";
+import { getUserAccessData } from "@/lib/wms-queries";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  await requirePageAccess(ADMIN_ROLES);
+  const [dashboard, userData] = await Promise.all([getDashboardData(), getUserAccessData()]);
   return (
     <div className="page">
       <PageHeader
@@ -17,25 +23,25 @@ export default function AdminPage() {
       {/* KPI Cards */}
       <section className="grid grid-3">
         <MetricCard
-          helper="Enabled WMS operational areas"
+          helper="Active item master records"
           icon={ClipboardList}
-          label="Modules"
+          label="Materials"
           tone="blue"
-          value="10"
+          value={String(dashboard.metrics.materialCount)}
         />
         <MetricCard
-          helper="Warehouse task business checks"
+          helper="Configured warehouse locations"
           icon={Database}
-          label="Controls"
+          label="Locations"
           tone="green"
-          value="8"
+          value={String(dashboard.metrics.locationCount)}
         />
         <MetricCard
-          helper="Permission matrix (RACI)"
+          helper="Available RBAC roles"
           icon={ShieldCheck}
           label="Roles"
           tone="violet"
-          value="RACI"
+          value={String(userData.roles.length)}
         />
       </section>
 
@@ -47,9 +53,9 @@ export default function AdminPage() {
         gap: 12
       }}>
         {[
-          { label: "API Health", value: "99.98%", color: "var(--emerald)", bg: "var(--emerald-light)", border: "#bbf7d0", icon: Activity },
-          { label: "Active Users", value: "12", color: "var(--brand)", bg: "var(--brand-light)", border: "var(--brand-mid)", icon: Users },
-          { label: "Daily Tasks", value: "247", color: "var(--amber)", bg: "var(--amber-light)", border: "#fde68a", icon: BarChart3 },
+          { label: "Data Source", value: dashboard.source === "live" ? "LIVE" : dashboard.source.toUpperCase(), color: "var(--emerald)", bg: "var(--emerald-light)", border: "#bbf7d0", icon: Activity },
+          { label: "Active Users", value: String(userData.profiles.filter(profile => profile.is_active).length), color: "var(--brand)", bg: "var(--brand-light)", border: "var(--brand-mid)", icon: Users },
+          { label: "Movements", value: String(dashboard.metrics.movementCount), color: "var(--amber)", bg: "var(--amber-light)", border: "#fde68a", icon: BarChart3 },
         ].map(({ label, value, color, bg, border, icon: Icon }) => (
           <div key={label} style={{
             display: "flex", alignItems: "center", gap: 14,
