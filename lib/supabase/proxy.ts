@@ -1,6 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { hasAllowedRole, requiredRolesForPath } from "@/lib/access-control";
+import {
+  LOGIN_RETURN_COOKIE,
+  LOGIN_RETURN_COOKIE_MAX_AGE_SECONDS,
+  safeLoginReturnPath,
+} from "@/lib/login-return";
 import type { Database } from "@/lib/supabase/types";
 
 const PUBLIC_PATHS = new Set(["/login", "/access-denied", "/api/health", "/offline.html"]);
@@ -23,8 +28,18 @@ function unauthenticatedResponse(request: NextRequest) {
   const loginUrl = request.nextUrl.clone();
   loginUrl.pathname = "/login";
   loginUrl.search = "";
-  loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
-  return privateNoStore(NextResponse.redirect(loginUrl));
+  const response = privateNoStore(NextResponse.redirect(loginUrl));
+  response.cookies.set({
+    name: LOGIN_RETURN_COOKIE,
+    value: safeLoginReturnPath(`${request.nextUrl.pathname}${request.nextUrl.search}`),
+    httpOnly: true,
+    maxAge: LOGIN_RETURN_COOKIE_MAX_AGE_SECONDS,
+    path: "/",
+    priority: "high",
+    sameSite: "lax",
+    secure: request.nextUrl.protocol === "https:",
+  });
+  return response;
 }
 
 function forbiddenResponse(request: NextRequest) {
@@ -91,7 +106,9 @@ export async function updateSession(request: NextRequest) {
   const userRoles = roleRows?.map((role) => role.name) ?? [];
 
   if (request.nextUrl.pathname === "/login") {
-    return privateNoStore(NextResponse.redirect(new URL("/", request.url)));
+    const redirectResponse = privateNoStore(NextResponse.redirect(new URL("/", request.url)));
+    redirectResponse.cookies.delete(LOGIN_RETURN_COOKIE);
+    return redirectResponse;
   }
 
   const allowedRoles = requiredRolesForPath(request.nextUrl.pathname);

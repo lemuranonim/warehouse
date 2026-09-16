@@ -22,12 +22,11 @@ function SubmitButton() {
   );
 }
 
-export function LoginForm({ nextPath }: { nextPath: string }) {
+export function LoginForm() {
   const [state, formAction] = useActionState(loginAction, initialState);
 
   return (
     <form action={formAction}>
-      <input name="next" type="hidden" value={nextPath} />
       <div style={{ marginBottom: 16 }}>
         <label className="field-label" htmlFor="email">Email</label>
         <input

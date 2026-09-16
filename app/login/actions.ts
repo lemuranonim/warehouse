@@ -1,7 +1,8 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { safeInternalPath } from "@/lib/safe-navigation";
+import { LOGIN_RETURN_COOKIE, safeLoginReturnPath } from "@/lib/login-return";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export type LoginState = { error: string };
@@ -9,7 +10,6 @@ export type LoginState = { error: string };
 export async function loginAction(_state: LoginState, formData: FormData): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const nextPath = safeInternalPath(formData.get("next"));
 
   if (!email || email.length > 254 || !email.includes("@")) {
     return { error: "Masukkan alamat email yang valid." };
@@ -45,5 +45,8 @@ export async function loginAction(_state: LoginState, formData: FormData): Promi
     return { error: "Akun belum memiliki role Warehouse WMS." };
   }
 
+  const cookieStore = await cookies();
+  const nextPath = safeLoginReturnPath(cookieStore.get(LOGIN_RETURN_COOKIE)?.value);
+  cookieStore.delete(LOGIN_RETURN_COOKIE);
   redirect(nextPath);
 }

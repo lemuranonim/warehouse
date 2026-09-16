@@ -1,15 +1,8 @@
 import Image from "next/image";
 import { ShieldCheck } from "lucide-react";
 import { LoginForm } from "@/components/login-form";
-import { safeInternalPath } from "@/lib/safe-navigation";
 
-type LoginPageProps = {
-  searchParams: Promise<{ next?: string }>;
-};
-
-export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const requestedNext = (await searchParams).next;
-  const nextPath = safeInternalPath(requestedNext);
+export default function LoginPage() {
   return (
     <div className="login-layout">
       {/* Left panel — brand */}
@@ -161,7 +154,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </p>
           </div>
 
-          <LoginForm nextPath={nextPath} />
+          <LoginForm />
 
           <div style={{
             marginTop: 24, paddingTop: 20,
