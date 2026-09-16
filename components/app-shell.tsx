@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
@@ -96,28 +96,53 @@ function NavLinkContent({ icon: Icon, label }: { icon: typeof Home; label: strin
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isAuthRoute = pathname === "/login" || pathname === "/access-denied";
   const [email, setEmail] = useState("");
   const [roles, setRoles] = useState<string[]>([]);
+  const [identityLoaded, setIdentityLoaded] = useState(false);
+  const identityLoadedForApp = useRef(false);
 
   useEffect(() => {
+    if (isAuthRoute) {
+      identityLoadedForApp.current = false;
+      return;
+    }
+
+    if (identityLoadedForApp.current) return;
+    identityLoadedForApp.current = true;
     let active = true;
     async function loadIdentity() {
       const supabase = createBrowserSupabaseClient();
       const { data } = await supabase.rpc("wms_current_access");
       const access = data?.[0];
-      if (!active || !access) return;
-      setEmail(access.email ?? "");
-      setRoles(access.roles);
+      if (!active) return;
+      if (access) {
+        setEmail(access.email ?? "");
+        setRoles(access.roles);
+      }
+      setIdentityLoaded(true);
     }
     void loadIdentity();
     return () => { active = false; };
+  }, [isAuthRoute]);
+
+  useEffect(() => {
+    const supabase = createBrowserSupabaseClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_OUT") return;
+      identityLoadedForApp.current = false;
+      setEmail("");
+      setRoles([]);
+      setIdentityLoaded(false);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
-  const visibleGroups = useMemo(() => navGroups
+  const visibleGroups = useMemo(() => identityLoaded ? navGroups
     .map((group) => ({ ...group, items: group.items.filter((item) => canShow(roles, item.roles)) }))
-    .filter((group) => group.items.length > 0), [roles]);
+    .filter((group) => group.items.length > 0) : [], [identityLoaded, roles]);
 
-  if (pathname === "/login" || pathname === "/access-denied") {
+  if (isAuthRoute) {
     return <main className="auth-shell-main">{children}</main>;
   }
 
@@ -142,6 +167,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="nav-scroll">
+          {!identityLoaded ? <div className="nav-loading" role="status">Memuat menu akses...</div> : null}
           {visibleGroups.map((group) => (
             <nav className="nav-section" key={group.title}>
               <div className="nav-section-title">{group.title}</div>
